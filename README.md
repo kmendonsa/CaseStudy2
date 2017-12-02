@@ -1,10 +1,10 @@
 # CaseStudy2
 
-Introduction 
-
-Procastination.csv
+# Introduction 
 
 Procrastination - A global view
+
+Procastination.csv
 
 Survey questionnaire types: DP, AIP, GP, and SWLS
 
