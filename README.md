@@ -8,6 +8,12 @@ Procastination.csv
 
 Survey questionnaire types: DP, AIP, GP, and SWLS
 
+GP:General Procrastination Scale
+
+The General Procrastination scale is used for people to describe a wide variety of activites associated with procrastinatoin. It is a 5-point scale: (1 - Extremely uncharacteristic 3 - Netural 5 - Extremeley Characterisitc). An Example of this question type includes, "When it is time to get up in the morning, I most often get right out of bed. "
+
+Source: http://www.sciencedirect.com/science/article/pii/0092656686901273?via%3Dihub
+
 DP: Decisoinal Procrastination Scale 
 
 This scale is often regarded as the only reliable measure of indecision. The objective of this method is to measure the the tendency of participants to put off decisions by some other task or activity. An example used in this survey includes, "I don’t make decisions unless I really have to."
@@ -19,9 +25,6 @@ AIP: Adult Inventory of Procrastination
 The AIP measures the tendency for individuals to postpone tasks under differing circumstances. It is most often used as a measure of procrastination due to fear, procrastination due to a lack of skills, or procrastination to protect ones self-esteem from failure. Answers are submitted on a 5 point scale: (1 = strongly disagree; 5 = strongly agree). Examples of qeustions include, “I am not very good at meeting deadlines.”
 
 Source: https://www.researchgate.net/publication/279532373_Adult_Inventory_of_Procrastination_Scale_AIP_A_comparison_of_models_with_an_Italian_sample
-
-
-GP:
 
 
 SWLS: Satisfied With Life Scale 
