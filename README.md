@@ -10,3 +10,11 @@ DP questions are designed assumin some underlying questions. For example, if a r
 Sourc: DP: A Detector for Presuppositions in survey questions Sonya RAJAN, Art GRAESSER, Roger KREUZ, & Ashish KARNAVAT Institute for Intelligent Systems, University of Memphis, Memphis, TN 38152
 
 AIP:
+
+
+GP:
+
+
+SWLS: Satisfied With Life Scale 
+
+SWLS is typically a concise 5-item insturment used to underantd and measure global cognitice judgements pertaining to the satification of a participants time. These survey questions do not weight the imporatnce of any one particular area of an individuals life, but rather allow individuals to factor in all aspects of thier life. An example used in the procrastination survey, "I am satisfied with my life" doesn't ask about a specific aspect, but rather a broad representation. 
