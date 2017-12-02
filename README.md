@@ -14,7 +14,11 @@ This scale is often regarded as the only reliable measure of indecision. The obj
 
 Source: https://www.researchgate.net/profile/Joseph_Ferrari3/publication/232562755_Decisional_procrastination_Examining_personality_correlates/links/5556ae4d08ae6943a8734cc2/Decisional-procrastination-Examining-personality-correlates.pdf
 
-AIP:
+AIP: Adult Inventory of Procrastination 
+
+The AIP measures the tendency for individuals to postpone tasks under differing circumstances. It is most often used as a measure of procrastination due to fear, procrastination due to a lack of skills, or procrastination to protect ones self-esteem from failure. Answers are submitted on a 5 point scale: (1 = strongly disagree; 5 = strongly agree). Examples of qeustions include, “I am not very good at meeting deadlines.”
+
+Source: https://www.researchgate.net/publication/279532373_Adult_Inventory_of_Procrastination_Scale_AIP_A_comparison_of_models_with_an_Italian_sample
 
 
 GP:
