@@ -15,9 +15,11 @@ Source -
 File: CaseStudy2.md
 File: ReadMe.md
 
-Procastination.csv
+# Procrastination Data Set 
 
-Survey questionnaire types: DP, AIP, GP, and SWLS
+File is labeled Procastination.csv and can be found in the Data repo
+
+There were several survey questionnaire types that are not defined in the data set: DP, AIP, GP, and SWLS. We will explain the concepts of these questions so that it may be properly interpreted. 
 
 GP:General Procrastination Scale
 
