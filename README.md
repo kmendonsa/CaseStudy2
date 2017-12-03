@@ -11,8 +11,11 @@ The Git Hub was logically organized to make review, commits, and accessibility e
 All these repo are contained within the parent repo, CaseStudy2
 
 Data - This repo contains all the data related to the project. This data will be described in detail in later sections but the two key files are the procrastination.csv file and the data scraped from wikipedia on Human Development Index.
+
 Other - This repo contains working files of the entire project. Individual sections of the Case Study can be found here. 
+
 Paper - The objectives of the case study are stored in this repo. 
+
 Source - 
 
 # Procrastination Data Set 
