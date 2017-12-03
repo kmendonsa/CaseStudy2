@@ -2,7 +2,7 @@
 
 # Introduction 
 
-Procrastination - A global view . WORK IN PROGRESS
+Procrastination - A global view . This anlaysis takes a closer look into the behaviors of procrastination and the variables that may contribute to these behaviors. 
 
 # Repo Organization 
 
