@@ -39,8 +39,6 @@ library(tidyverse)
 
 library(stringr)
 
-library(qwraps2)
-
 library(ggplot2)
 
 library(RColorBrewer)
@@ -49,15 +47,11 @@ library(kableExtra)
 
 library(xtable)
 
-library(stargazer)
-
 library(knitr)
-# install.packages("formattable")
+
 library(formattable)
 
-# define the markup language we are working in.
-# options(qwraps2_markup = "latex") is also supported.
-options(qwraps2_markup = "markdown")
+# Set option for knitr
 options(knitr.table.format = "html")
 
 ```
@@ -123,27 +117,35 @@ procrastinate_raw <- read.csv("Procrastination.csv",
 
       
 # Add the Category for each data frame                               
-        VHigh_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
-                              from VHigh_HDI_df
-                              Where VHigh_HDI_df.X3 not in ('Rank', 'Country',
-                              'Change in rank from previous year[1]')")
+        VHigh_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                               X3 as Country,
+                               X4 as HDI
+                               from VHigh_HDI_df
+                               Where VHigh_HDI_df.X3 not in ('Rank', 'Country',
+                               'Change in rank from previous year[1]')")
         
-        High_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
+        High_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                              X3 as Country,
+                              X4 as HDI
                               from High_HDI_df
                               Where High_HDI_df.X3 not in ('Rank', 'Country',
                               'Change in rank from previous year[1]')")
         
-        Med_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
+        Med_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                              X3 as Country,
+                              X4 as HDI
                               from Med_HDI_df
                               Where Med_HDI_df.X3 not in ('Rank', 'Country',
                               'Change in rank from previous year[1]')")
         
-        Low_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
-                              from Low_HDI_df
-                              Where Low_HDI_df.X3 not in ('Rank', 'Country',
-                              'Change in rank from previous year[1]')")
+        Low_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                             X3 as Country,
+                             X4 as HDI
+                             from Low_HDI_df
+                             Where Low_HDI_df.X3 not in ('Rank', 'Country',
+                             'Change in rank from previous year[1]')")
         
-# Merge all the data frames into a single data frame
+# Merge all the data frames into a single data frame HDI_raw
         HDI_raw <- rbind(VHigh_HDI_df,
                           High_HDI_df,
                            Med_HDI_df,
@@ -151,22 +153,21 @@ procrastinate_raw <- read.csv("Procrastination.csv",
 
 ```
   
-# Number of Rows/Observations and Columns/Variables in the dataset
-```{r dimension_data}
- dim(procrastinate_raw)
- NCOL(procrastinate_raw)
- NROW(procrastinate_raw)
- dim(HDI_raw)
- 
-#  paste_meansd <- function(x, digits = 2, na.rm = TRUE){
-# paste0(round(mean(x, na.rm = na.rm), digits), " (", round(sd(
-# x, na.rm = na.rm), digits), ")")
-# }
-## The mean (sd) of a random sample of normals is `r paste_mean sd(rnorm(100))`
-```
-#  The mean (sd) of a random sample of normals is 0.04 (1.01)
+# The datasets we used to analyze global procrastination consisted of 
+  the following observations and variables:
+  Procrastination data: 
+  Human Development Index data
   
-# Prepare data for cleansing and transformaiton 
+```{r dimension_data}
+ # dim(procrastinate_raw)
+   cbind(ROWS=NROW(procrastinate_raw), COLUMNS=NCOL(procrastinate_raw))
+ # dim(HDI_raw)
+ 
+```
+
+  
+# Prepare data for cleansing and transformation 
+
 ```{r prepare_for_cleansing}
 # Add a uniqueID to each row - we may need it later
   procrastinate_raw <- rowid_to_column(procrastinate_raw, "RowID")
@@ -178,6 +179,7 @@ procrastinate_raw <- read.csv("Procrastination.csv",
   
 
 # Rename the variables
+
 ```{r change_variable_names}
 names(procrastinate) <- c("RowID",
                             "Age",
@@ -754,9 +756,11 @@ procrastinate$Country <- plyr::revalue(procrastinate$Country,
                                             c("Columbia" = "Colombia", 
                                               "Isreal"   = "Israel"))
 
-
 # Merge the two data sets to a single data set
 HDIMerged <- merge(procrastinate, HDI_raw, by = "Country", all.x = TRUE)
+
+# Replace NA with explicit *Missing* in HDI category
+HDIMerged$HDICategory[is.na(HDIMerged$HDICategory)] <- "*Missing*"
 ```
 
 ### PRELIMINARY DATA ANALYSIS
@@ -765,29 +769,31 @@ HDIMerged <- merge(procrastinate, HDI_raw, by = "Country", all.x = TRUE)
 
 DESCRIPTIVE STATISTICS OF KEY FACTORS
 
-AGE
+AGE - INCOME - HDI Descriptive statistics
 
 ```{r age_stats}
-# summary(HDIMerged$Age)
+AGE    <- HDIMerged$Age
+INCOME <- HDIMerged$Income
+HDI    <- HDIMerged$HDI
 
-```
-The Mean Age with a 95% confidence interval is `r mean(HDIMerged$Age)`
+d <- data.frame(AGE,INCOME, HDI )
 
-INCOME
-```{r income_stats}
-summary(HDIMerged$Income)
-```
-HDI
-```{r hdi_stats}
-summary(HDIMerged$HDI)
+summary(d)
 ```
 
 SURVEY MEANS - DP, GP, AIP, SWLS
+
 ```{r mean_stats}
-summary(HDIMerged$DPMean)
-summary(HDIMerged$GPMean)
-summary(HDIMerged$AIPMean)
-summary(HDIMerged$SWLSMean)
+
+DP   <- HDIMerged$DPMean
+GP   <- HDIMerged$GPMean
+AIP  <- HDIMerged$AIPMean
+SWLS <- HDIMerged$SWLSMean
+
+d <- data.frame(DP,GP, AIP, SWLS )
+
+summary(d)
+
 ```
 
 
@@ -820,206 +826,145 @@ ggplot(data=HDIMerged, aes(x=HDIMerged$GPMean)) +
   ylim(c(0,550)) +
   theme(plot.title = element_text(hjust = 0.5, vjust=0.5))
 
-# Histogram for SWLSMean
-ggplot(data=HDIMerged, aes(x=HDIMerged$SWLSMean)) + 
-  geom_histogram(binwidth = .25, 
-                 col="blue", 
-                 fill="red", 
-                 alpha = .2) + 
-  labs(title="Histogram of SWLS Mean", x="SWLS Mean", y="Count") + 
-  xlim(c(0,5)) + 
-  ylim(c(0,900)) +
-  theme(plot.title = element_text(hjust = 0.5, vjust=0.5))
-
 ```
 
-## The distribution of the AIP Mean and the GP Mean and
+## The distribution of the AIP Mean and the GP Mean
 # The distribution for the AIP mean has some appearence of a bi-modal distribution but it does fit a normal distribution fairly well. The distribution for the for the GP mean has some left skew but still confirms to a normal distribution.
 
 
 ```{r kable_formatting}
-GenderFreq <- table(HDIMerged$Gender) %>%
-  print()
 
-WrkStatusFreq <- table(HDIMerged$WrkStatus)%>%
-  print()
-  
-OccupationAltFreq <- table(HDIMerged$OccupatnAlt) %>%
-  print()  
+GenderFreq <- sqldf("select Gender, count(1) as Count
+                      from HDIMerged
+                      Group by Gender
+                      Order by 2 desc")
 
-Country <- sqldf ("select Country, Count(Country) as Count
-                    from HDIMerged 
+kable(GenderFreq, "html") %>%
+kable_styling("striped", full_width = F, position = "left" ) %>%
+column_spec(2, bold = T) %>%
+row_spec(3, bold = T, color = "white", background = "#D7261E")
+
+WrkStatusFreq <- sqldf("select WrkStatus, count(1) as Count
+                        from HDIMerged
+                        Group by WrkStatus
+                        Order by 2 desc")
+
+kable(WrkStatusFreq, "html") %>%
+kable_styling("striped", full_width = F, position = "left" ) %>%
+column_spec(2, bold = T) %>%
+row_spec(6, bold = T, color = "white", background = "#D7261E")
+
+Country <- sqldf ("select Country, Count(1) as Participants
+                    from HDIMerged
                     Where Country<>'*Missing*'
-                    Group by Country 
-                    Order by Country") %>%
-            print()
+                    Group by Country
+                    Order by 2 desc")
 
-Matched <- sqldf ("select Count(1) as 'Matched'
-                    from HDIMerged 
+Country1 <- Country[1:30,]
+Country2 <- Country[31:60,]
+Country3 <- Country[61:90,]
+CountryCount <- cbind(Country1, Country2,Country3)
+
+kable(CountryCount, "html") %>%
+kable_styling("striped", full_width = F, position = "left" ) %>%
+column_spec(c(2,4,6), bold = T, background = "lightblue") 
+
+Matched <- sqldf ("select Count(1) as 'Yes'
+                    from HDIMerged
                     Where SelfProcrast=OthrProcrast
+                    AND SelfProcrast='Yes'
                     ")
 
-dt <- mtcars[1:5, 1:6]
-kable(dt, "html")
+#TOP 15 nations with average procrastination scores
+#5b
 
-dt %>%
-kable("html") %>%
-kable_styling()
+# Aggregate the average DP Mean by country
+DPMeanByCountry <- select(HDIMerged, Country, DPMean) %>%
+                  filter(Country!="*Missing*") %>%
+                  aggregate(DPMean ~ Country, .,mean)
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = c("striped", "hover"))
+# Distinct list of Country and HDI category
+HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory)) 
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = c("striped", "hover",
-"condensed"))
+# Merge the aggregate of DPMean and the distinct country and HDI category
+Top15ProcrastinatorsDP <- merge(DPMeanByCountry, HDICategoryByCountry, by = "Country", all.x = TRUE) %>%
+                            arrange(desc(DPMean)) %>%
+                            slice(1:15)
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = c("striped", "hover",
-"condensed", "responsive"))
+# Round the aggregated mean to 2 decimal places
+Top15ProcrastinatorsDP$DPMean <- round(Top15ProcrastinatorsDP$DPMean, digits=2)
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", full_width
-= F)
+# SQL code not required but used for validation
+Top15ProcrastinatorsDP <- sqldf("select Country, 
+                               HDICategory, 
+                               round(sum(DPMean)/count(DPMean),2) as DPMean
+                               from HDIMerged
+                               Where Country<>'*Missing*'
+                               Group by Country, HDICategory
+                               Order by DPMean desc") %>%
+                               slice(1:15)
+  
+# Bar graph using GGPLOT for Top 15 countries in descending order for DP mean
+ggplot(Top15ProcrastinatorsDP,aes(x=reorder(Country,-DPMean),y=DPMean, fill=HDICategory))+
+  geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
+  coord_cartesian(xlim = c(0,16), ylim = c(3, 4.25))+
+  xlab("Country") + 
+  ylab("DP Mean") + 
+  ggtitle("Country by Procrastination - DP Mean Score")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=10, angle = 90, hjust = 1, vjust = 0.5),
+  axis.title=element_text(size=12),
+  plot.title = element_text(size=15, hjust = 0.5, vjust = 1)) +
+  scale_color_gradient()+
+  scale_fill_brewer(palette="Set1")
+  
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", full_width
-= F, position = "left")
+#TOP 15 nations with average procrastination scores
+# 5c
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", full_width
-= F, position = "float_right")
+# Aggregate the average AIP Mean by country
+AIPMeanByCountry <- select(HDIMerged, Country, AIPMean) %>%
+                  filter(Country!="*Missing*") %>%
+                  aggregate(AIPMean ~ Country, .,mean)
 
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", font_size =
-7)
+# Distinct list of Country and HDI category
+HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory)) 
 
-text_tbl <- data.frame(
-Items = c("Item 1", "Item 2", "Item 3"),
-Features = c(
-"Lorem ipsum dolor sit amet, consectetur adipiscing el
-it. Proin vehicula tempor ex. Morbi malesuada sagittis tur
-pis, at venenatis nisl luctus a. ",
-"In eu urna at magna luctus rhoncus quis in nisl. Fusc
-e in velit varius, posuere risus et, cursus augue. Duis el
-eifend aliquam ante, a aliquet ex tincidunt in. ",
-"Vivamus venenatis egestas eros ut tempus. Vivamus id
-est nisi. Aliquam molestie erat et sollicitudin venenatis.
-In ac lacus at velit scelerisque mattis. "
-)
-)
-kable(text_tbl, "html") %>%
-kable_styling(full_width = F) %>%
-column_spec(1, bold = T, border_right = T) %>%
-column_spec(2, width = "30em", background = "yellow")
+# Merge the aggregate of DPMean and the distinct country and HDI category
+Top15ProcrastinatorsAIP <- merge(AIPMeanByCountry, HDICategoryByCountry, by = "Country", all.x = TRUE) %>%
+                            arrange(desc(AIPMean)) %>%
+                            slice(1:15)
 
+# Round the aggregated mean to 2 decimal places
+Top15ProcrastinatorsAIP$AIPMean <- round(Top15ProcrastinatorsAIP$AIPMean, digits=2)
 
+# SQL code not required but used for validation
+Top15ProcrastinatorsAIP <- sqldf("select Country, 
+                               HDICategory, 
+                               round(sum(AIPMean)/count(AIPMean),2) as AIPMean
+                               from HDIMerged
+                               Where Country<>'*Missing*'
+                               Group by Country, HDICategory
+                               Order by AIPMean desc") %>%
+                               slice(1:15)
 
-kable(dt, "html") %>%
-kable_styling("striped", full_width = F) %>%
-column_spec(5:7, bold = T) %>%
-row_spec(3:5, bold = T, color = "white", background = "#
-D7261E")
+# Bar graph using GGPLOT for Top 15 countries in descending order for AIP mean
+ggplot(Top15ProcrastinatorsAIP,aes(x=reorder(Country,-AIPMean),y=AIPMean, fill=HDICategory))+
+  geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
+  coord_cartesian(xlim = c(0,16), ylim = c(3, 4.75))+
+  xlab("Country") + 
+  ylab("AIP Mean") + 
+  ggtitle("Country by Procrastination - AIP Mean Score")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=10, angle = 90, hjust = 1, vjust = 0.5),
+  axis.title=element_text(size=12),
+  plot.title = element_text(size=15, hjust = 0.5, vjust = 1)) +
+  scale_color_gradient()+
+  scale_fill_brewer(palette="Set1")
 
-kable(dt, format = "html") %>%
-kable_styling("striped", full_width = F) %>%
-row_spec(0, angle = -45)
-
-
-
-mtcars[1:10, 1:2] %>%
-mutate(
-car = row.names(.),
-# You don't need format = "html" if you have ever defined options(knitr.table.format)
-
-mpg = cell_spec(mpg, "html", color = ifelse(mpg > 20,
-"red", "blue")),
-cyl = cell_spec(cyl, "html", color = "white", align =
-"c", angle = 45,
-background = factor(cyl, c(4, 6, 8),
-c("#666666", "#999
-999", "#BBBBBB")))
-) %>%
-select(car, mpg, cyl) %>%
-kable("html", escape = F) %>%
-kable_styling("striped", full_width = F)
-
-
-
-iris[1:10, ] %>%
-mutate_if(is.numeric, function(x) {
-cell_spec(x, "html", bold = T, color = spec_color(x, end = 0.9),
-font_size = spec_font_size(x))
-}) %>%
-mutate(Species = cell_spec(
-Species, "html", color = "white", bold = T,
-background = spec_color(1:10, end = 0.9, option = "A",
-direction = -1)
-)) %>%
-kable("html", escape = F, align = "c") %>%
-kable_styling("striped", full_width = F)
-
-
-
-sometext <- strsplit(paste0(
-"You can even try to make some crazy things like this paragraph. ",
-"It may seem like a useless feature right now but it's so cool ",
-"and nobody can resist. ;)"
-), " ")[[1]]
-text_formatted <- paste(
-text_spec(sometext, "html", color = spec_color(1:length(
-sometext), end = 0.9),
-font_size = spec_font_size(1:length(sometext),
-begin = 5, end = 20)),
-collapse = " ")
-
-#To display the text, type `r text_formatted` outside of the chunk
-
-popover_dt <- data.frame(
-position = c("top", "bottom", "right", "left"),
-stringsAsFactors = FALSE
-)
-popover_dt$`Hover over these items` <- cell_spec(
-paste("Message on", popover_dt$position), # Cell texts
-popover = spec_popover(
-content = popover_dt$position,
-title = NULL, # title will add a Title Panel on top
-position = popover_dt$position
-))
-kable(popover_dt, "html", escape = FALSE) %>%
-kable_styling("striped", full_width = FALSE)
-
-
-popover_dt <- data.frame(
-position = c("top", "bottom", "right", "left"),
-stringsAsFactors = FALSE
-)
-popover_dt$`Hover over these items` <- cell_spec(
-paste("Message on", popover_dt$position), # Cell texts
-popover = spec_popover(
-content = popover_dt$position,
-title = NULL, # title will add a Title Panel on top
-position = popover_dt$position
-))
-kable(popover_dt, "html", escape = FALSE) %>%
-kable_styling("striped", full_width = FALSE)
-
-kable(dt, "html") %>%
-kable_styling("striped") %>%
-add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2, "Group 3" = 2))
-
-kable(dt, "html") %>%
-kable_styling(c("striped", "bordered")) %>%
-add_header_above(c(" ", "Group 1" = 2, "Group 2" = 2, "Group 3" = 2)) %>%
-add_header_above(c(" ", "Group 4" = 4, "Group 5" = 2)) %>%
-add_header_above(c(" ", "Group 6" = 6))
-
-kable(cbind(mtcars, mtcars), "html") %>%
-kable_styling() %>%
-scroll_box(width = "900px", height = "600px")
 
 ```
 
-`r text_formatted`
 
 # Create a new data.frame with columns rearranged with the CLEAN data
 
@@ -1100,4 +1045,264 @@ procrastinateClean <- select(procrastinate, RowID,
 # Write CSV in R
 # write.csv(procrastinateClean, file = "Test.csv")
 # write.csv(HDIMerged, file = "merged.csv", row.names=FALSE )
+
+
 ```
+
+
+
+```{r extra_code}
+
+# Extra code will clean out later before submission
+# Top15ProcrastinatorsAIP <- HDIMerged %>%
+#                             filter(Country!="*Missing*") %>%
+#                             select(Country, AIPMean, HDICategory) %>%
+#                             aggregate(AIPMean ~ Country, .,mean) %>%
+#                             arrange(desc(AIPMean)) %>%
+#                             slice(1:15)
+# 
+# # Round the aggregated mean to 2 decimal places
+# Top15ProcrastinatorsAIP$AIPMean <- round(Top15ProcrastinatorsAIP$AIPMean, digits=2)
+# 
+# 
+# Top15ProcrastinatorsByCoountry <- sqldf("select Country, 
+#                                          HDICategory, 
+#                                          round(avg(DPMean),2) as DPMean,
+#                                          round(avg(AIPMean),2) as AIPMean
+#                                          from HDIMerged
+#                                          Where Country<>'*Missing*'
+#                                          Group by Country, HDICategory
+#                                          Order by AIPMean desc") %>%
+#                                          slice(1:15)
+#   
+
+
+
+
+# display.brewer.all()
+# kable(Top15Procrastinators, "html") %>%
+# kable_styling("striped", full_width = F, position = "left" ) %>%
+# column_spec(2, background = "mistyrose") 
+# row_spec(3, bold = T, color = "white", background = "#D7261E")
+
+# # Using SQL
+# Top15ProcrastinatorsSQL <- sqldf("select Country, HDICategory, round(sum(DPMean)/count(DPMean),2) as DPMean
+#                                   from HDIMerged
+#                                   Where Country<>'*Missing*'
+#                                   Group by Country, HDI
+#                                   Order by DPMean desc") %>%
+#                                   slice(1:15)
+
+
+# Using the lm function run a simple linear regression
+#data.lm <- lm(Income ~ Age, data=HDIMerged)
+
+#Print the result set
+#data.lm
+
+#Print the summary for the result set
+#summary(data.lm)
+
+#95% Confidence Intervals
+#confint.lm(data.lm)
+
+# Scatter plot for data *******************************************
+# plot(x = HDIMerged$Age, 
+#      y = log(HDIMerged$Income),
+#      #xlim = c(3.25,10), 
+#      #ylim = c(.180,.525) ,
+#      xlab = "Age", 
+#      ylab = "Income", 
+#      main = "Age vs Income"
+#      )
+# 
+# # linear regression analysis
+# mylm <- lm(log(Income) ~ Age, data=HDIMerged)
+# 
+# abline (mylm, col = "red")
+
+# Add the regression line
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point()+
+#   geom_smooth(method=lm)
+# # Remove the confidence interval
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point()+
+#   geom_smooth(method=lm, se=FALSE)
+# # Loess method
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point()+
+#   geom_smooth()
+# 
+# # Change the point colors and shapes
+# # Change the line type and color
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point(shape=18, color="blue")+
+#   geom_smooth(method=lm, se=FALSE, linetype="dashed",
+#              color="darkred")
+# # Change the confidence interval fill color
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point(shape=18, color="blue")+
+#   geom_smooth(method=lm,  linetype="dashed",
+#              color="darkred", fill="blue")
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = c("striped", "hover"))
+# 
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = c("striped", "hover",
+# "condensed"))
+# 
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = c("striped", "hover",
+# "condensed", "responsive"))
+# 
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = "striped", full_width= F)
+
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = "striped", full_width
+# = F, position = "left")
+
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = "striped", full_width
+# = F, position = "float_left")
+
+# kable(WrkStatusFreq, format = "html") %>%
+# kable_styling("striped", full_width = F) %>%
+# row_spec(0, angle = 0)
+
+```
+
+
+
+
+```{r kable_formatting_extra}
+#  dt <- mtcars[1:5, 1:6]
+#  kable(dt, "html")
+# 
+# dt %>%
+# kable("html") %>%
+# kable_styling()
+# 
+# kable(dt, "html") %>%
+# kable_styling(bootstrap_options = "striped", font_size =
+# 7)
+# 
+# text_tbl <- data.frame(
+# Items = c("Item 1", "Item 2", "Item 3"),
+# Features = c(
+# "Lorem ipsum dolor sit amet, consectetur adipiscing el
+# it. Proin vehicula tempor ex. Morbi malesuada sagittis tur
+# pis, at venenatis nisl luctus a. ",
+# "In eu urna at magna luctus rhoncus quis in nisl. Fusc
+# e in velit varius, posuere risus et, cursus augue. Duis el
+# eifend aliquam ante, a aliquet ex tincidunt in. ",
+# "Vivamus venenatis egestas eros ut tempus. Vivamus id
+# est nisi. Aliquam molestie erat et sollicitudin venenatis.
+# In ac lacus at velit scelerisque mattis. "
+# )
+# )
+# kable(text_tbl, "html") %>%
+# kable_styling(full_width = F) %>%
+# column_spec(1, bold = T, border_right = T) %>%
+# column_spec(2, width = "30em", background = "yellow")
+# 
+# 
+# 
+# 
+# 
+# 
+# mtcars[1:10, 1:2] %>%
+# mutate(
+# car = row.names(.),
+# # You don't need format = "html" if you have ever defined options(knitr.table.format)
+# 
+# mpg = cell_spec(mpg, "html", color = ifelse(mpg > 20,
+# "red", "blue")),
+# cyl = cell_spec(cyl, "html", color = "white", align =
+# "c", angle = 45,
+# background = factor(cyl, c(4, 6, 8),
+# c("#666666", "#999
+# 999", "#BBBBBB")))
+# ) %>%
+# select(car, mpg, cyl) %>%
+# kable("html", escape = F) %>%
+# kable_styling("striped", full_width = F)
+# 
+# 
+# 
+# iris[1:10, ] %>%
+# mutate_if(is.numeric, function(x) {
+# cell_spec(x, "html", bold = T, color = spec_color(x, end = 0.9),
+# font_size = spec_font_size(x))
+# }) %>%
+# mutate(Species = cell_spec(
+# Species, "html", color = "white", bold = T,
+# background = spec_color(1:10, end = 0.9, option = "A",
+# direction = -1)
+# )) %>%
+# kable("html", escape = F, align = "c") %>%
+# kable_styling("striped", full_width = F)
+# 
+# 
+# 
+# sometext <- strsplit(paste0(
+# "You can even try to make some crazy things like this paragraph. ",
+# "It may seem like a useless feature right now but it's so cool ",
+# "and nobody can resist. ;)"
+# ), " ")[[1]]
+# text_formatted <- paste(
+# text_spec(sometext, "html", color = spec_color(1:length(
+# sometext), end = 0.9),
+# font_size = spec_font_size(1:length(sometext),
+# begin = 5, end = 20)),
+# collapse = " ")
+# 
+# #To display the text, type `r text_formatted` outside of the chunk
+# 
+# popover_dt <- data.frame(
+# position = c("top", "bottom", "right", "left"),
+# stringsAsFactors = FALSE
+# )
+# popover_dt$`Hover over these items` <- cell_spec(
+# paste("Message on", popover_dt$position), # Cell texts
+# popover = spec_popover(
+# content = popover_dt$position,
+# title = NULL, # title will add a Title Panel on top
+# position = popover_dt$position
+# ))
+# kable(popover_dt, "html", escape = FALSE) %>%
+# kable_styling("striped", full_width = FALSE)
+# 
+# 
+# popover_dt <- data.frame(
+# position = c("top", "bottom", "right", "left"),
+# stringsAsFactors = FALSE
+# )
+# popover_dt$`Hover over these items` <- cell_spec(
+# paste("Message on", popover_dt$position), # Cell texts
+# popover = spec_popover(
+# content = popover_dt$position,
+# title = NULL, # title will add a Title Panel on top
+# position = popover_dt$position
+# ))
+# kable(popover_dt, "html", escape = FALSE) %>%
+# kable_styling("striped", full_width = FALSE)
+# 
+# kable(dt, "html") %>%
+# kable_styling("striped") %>%
+# add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2, "Group 3" = 2))
+# 
+# kable(dt, "html") %>%
+# kable_styling(c("striped", "bordered")) %>%
+# add_header_above(c(" ", "Group 1" = 2, "Group 2" = 2, "Group 3" = 2)) %>%
+# add_header_above(c(" ", "Group 4" = 4, "Group 5" = 2)) %>%
+# add_header_above(c(" ", "Group 6" = 6))
+# 
+# kable(cbind(mtcars, mtcars), "html") %>%
+# kable_styling() %>%
+# scroll_box(width = "900px", height = "600px")
+
+```
+
+

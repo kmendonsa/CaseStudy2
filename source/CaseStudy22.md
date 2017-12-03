@@ -129,19 +129,6 @@ sessionInfo()
 
 ```
 ## 
-## Please cite as:
-```
-
-```
-##  Hlavac, Marek (2015). stargazer: Well-Formatted Regression and Summary Statistics Tables.
-```
-
-```
-##  R package version 5.2. http://CRAN.R-project.org/package=stargazer
-```
-
-```
-## 
 ## Attaching package: 'formattable'
 ```
 
@@ -213,77 +200,64 @@ procrastinate_raw <- read.csv("Procrastination.csv",
 
       
 # Add the Category for each data frame                               
-        VHigh_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
-                              from VHigh_HDI_df
-                              Where VHigh_HDI_df.X3 not in ('Rank', 'Country',
-                              'Change in rank from previous year[1]')")
+        VHigh_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                               X3 as Country,
+                               X4 as HDI
+                               from VHigh_HDI_df
+                               Where VHigh_HDI_df.X3 not in ('Rank', 'Country',
+                               'Change in rank from previous year[1]')")
         
-        High_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
+        High_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                              X3 as Country,
+                              X4 as HDI
                               from High_HDI_df
                               Where High_HDI_df.X3 not in ('Rank', 'Country',
                               'Change in rank from previous year[1]')")
         
-        Med_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
+        Med_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                              X3 as Country,
+                              X4 as HDI
                               from Med_HDI_df
                               Where Med_HDI_df.X3 not in ('Rank', 'Country',
                               'Change in rank from previous year[1]')")
         
-        Low_HDI_df <- sqldf("select 'Very High' as Category,X3 as Country,X4 as HDI
-                              from Low_HDI_df
-                              Where Low_HDI_df.X3 not in ('Rank', 'Country',
-                              'Change in rank from previous year[1]')")
+        Low_HDI_df <- sqldf("select 'Very High' as HDICategory,
+                             X3 as Country,
+                             X4 as HDI
+                             from Low_HDI_df
+                             Where Low_HDI_df.X3 not in ('Rank', 'Country',
+                             'Change in rank from previous year[1]')")
         
-# Merge all the data frames into a single data frame
+# Merge all the data frames into a single data frame HDI_raw
         HDI_raw <- rbind(VHigh_HDI_df,
                           High_HDI_df,
                            Med_HDI_df,
                            Low_HDI_df )
 ```
   
-# Number of Rows/Observations and Columns/Variables in the dataset
-
-```r
- dim(procrastinate_raw)
-```
-
-```
-## [1] 4264   61
-```
-
-```r
- NCOL(procrastinate_raw)
-```
-
-```
-## [1] 61
-```
-
-```r
- NROW(procrastinate_raw)
-```
-
-```
-## [1] 4264
-```
-
-```r
- dim(HDI_raw)
-```
-
-```
-## [1] 189   3
-```
-
-```r
-#  paste_meansd <- function(x, digits = 2, na.rm = TRUE){
-# paste0(round(mean(x, na.rm = na.rm), digits), " (", round(sd(
-# x, na.rm = na.rm), digits), ")")
-# }
-## The mean (sd) of a random sample of normals is `r paste_mean sd(rnorm(100))`
-```
-#  The mean (sd) of a random sample of normals is 0.04 (1.01)
+# The datasets we used to analyze global procrastination consisted of 
+  the following observations and variables:
+  Procrastination data: 
+  Human Development Index data
   
-# Prepare data for cleansing and transformaiton 
+
+```r
+ # dim(procrastinate_raw)
+   cbind(ROWS=NROW(procrastinate_raw), COLUMNS=NCOL(procrastinate_raw))
+```
+
+```
+##      ROWS COLUMNS
+## [1,] 4264      61
+```
+
+```r
+ # dim(HDI_raw)
+```
+
+  
+# Prepare data for cleansing and transformation 
+
 
 ```r
 # Add a uniqueID to each row - we may need it later
@@ -296,6 +270,7 @@ procrastinate_raw <- read.csv("Procrastination.csv",
   
 
 # Rename the variables
+
 
 ```r
 names(procrastinate) <- c("RowID",
@@ -889,9 +864,11 @@ procrastinate$Country <- plyr::revalue(procrastinate$Country,
                                             c("Columbia" = "Colombia", 
                                               "Isreal"   = "Israel"))
 
-
 # Merge the two data sets to a single data set
 HDIMerged <- merge(procrastinate, HDI_raw, by = "Country", all.x = TRUE)
+
+# Replace NA with explicit *Missing* in HDI category
+HDIMerged$HDICategory[is.na(HDIMerged$HDICategory)] <- "*Missing*"
 ```
 
 ### PRELIMINARY DATA ANALYSIS
@@ -900,71 +877,52 @@ HDIMerged <- merge(procrastinate, HDI_raw, by = "Country", all.x = TRUE)
 
 DESCRIPTIVE STATISTICS OF KEY FACTORS
 
-AGE
+AGE - INCOME - HDI Descriptive statistics
 
 
 ```r
-# summary(HDIMerged$Age)
-```
-The Mean Age with a 95% confidence interval is NA
+AGE    <- HDIMerged$Age
+INCOME <- HDIMerged$Income
+HDI    <- HDIMerged$HDI
 
-INCOME
+d <- data.frame(AGE,INCOME, HDI )
 
-```r
-summary(HDIMerged$Income)
-```
-
-```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-##       0   15000   45000   58916   67500  250000     548
-```
-HDI
-
-```r
-summary(HDIMerged$HDI)
+summary(d)
 ```
 
 ```
-##    Length     Class      Mode 
-##      4264 character character
+##       AGE            INCOME            HDI      
+##  Min.   : 7.50   Min.   :     0   0.920  :3143  
+##  1st Qu.:28.00   1st Qu.: 15000   0.909  : 184  
+##  Median :32.50   Median : 45000   0.939  : 117  
+##  Mean   :37.43   Mean   : 58916   0.624  :  78  
+##  3rd Qu.:45.00   3rd Qu.: 67500   0.887  :  67  
+##  Max.   :80.00   Max.   :250000   (Other): 428  
+##  NA's   :71      NA's   :548      NA's   : 247
 ```
 
 SURVEY MEANS - DP, GP, AIP, SWLS
 
-```r
-summary(HDIMerged$DPMean)
-```
-
-```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   0.800   2.000   2.600   2.598   3.200   6.000
-```
 
 ```r
-summary(HDIMerged$GPMean)
+DP   <- HDIMerged$DPMean
+GP   <- HDIMerged$GPMean
+AIP  <- HDIMerged$AIPMean
+SWLS <- HDIMerged$SWLSMean
+
+d <- data.frame(DP,GP, AIP, SWLS )
+
+summary(d)
 ```
 
 ```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   1.000   2.750   3.250   3.227   3.750   5.000
-```
-
-```r
-summary(HDIMerged$AIPMean)
-```
-
-```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   1.000   2.330   2.930   2.936   3.530   5.000
-```
-
-```r
-summary(HDIMerged$SWLSMean)
-```
-
-```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   1.000   2.600   3.200   3.205   3.800   5.000
+##        DP              GP             AIP             SWLS      
+##  Min.   :0.800   Min.   :1.000   Min.   :1.000   Min.   :1.000  
+##  1st Qu.:2.000   1st Qu.:2.750   1st Qu.:2.330   1st Qu.:2.600  
+##  Median :2.600   Median :3.250   Median :2.930   Median :3.200  
+##  Mean   :2.598   Mean   :3.227   Mean   :2.936   Mean   :3.205  
+##  3rd Qu.:3.200   3rd Qu.:3.750   3rd Qu.:3.530   3rd Qu.:3.800  
+##  Max.   :6.000   Max.   :5.000   Max.   :5.000   Max.   :5.000
 ```
 
 
@@ -1005,3207 +963,459 @@ ggplot(data=HDIMerged, aes(x=HDIMerged$GPMean)) +
 
 ![](CaseStudy22_files/figure-html/histograms-2.png)<!-- -->
 
-```r
-# Histogram for SWLSMean
-ggplot(data=HDIMerged, aes(x=HDIMerged$SWLSMean)) + 
-  geom_histogram(binwidth = .25, 
-                 col="blue", 
-                 fill="red", 
-                 alpha = .2) + 
-  labs(title="Histogram of SWLS Mean", x="SWLS Mean", y="Count") + 
-  xlim(c(0,5)) + 
-  ylim(c(0,900)) +
-  theme(plot.title = element_text(hjust = 0.5, vjust=0.5))
-```
-
-![](CaseStudy22_files/figure-html/histograms-3.png)<!-- -->
-
-## The distribution of the AIP Mean and the GP Mean and
+## The distribution of the AIP Mean and the GP Mean
 # The distribution for the AIP mean has some appearence of a bi-modal distribution but it does fit a normal distribution fairly well. The distribution for the for the GP mean has some left skew but still confirms to a normal distribution.
 
 
 
 ```r
-GenderFreq <- table(HDIMerged$Gender) %>%
-  print()
-```
+GenderFreq <- sqldf("select Gender, count(1) as Count
+                      from HDIMerged
+                      Group by Gender
+                      Order by 2 desc")
 
-```
-## 
-## *Missing*    Female      Male 
-##         6      2295      1708
-```
-
-```r
-WrkStatusFreq <- table(HDIMerged$WrkStatus)%>%
-  print()
-```
-
-```
-## 
-##  *Missing*  Full-Time  Part-Time    Retired    Student Unemployed 
-##         42       2259        463        151        837        257
-```
-
-```r
-OccupationAltFreq <- table(HDIMerged$OccupatnAlt) %>%
-  print()  
-```
-
-```
-## 
-##                                *AMBIGUOUS* 
-##                                         22 
-##                                  *MISSING* 
-##                                       2647 
-##                  ACADEMIC - ADMINISTRATION 
-##                                          6 
-##       ACADEMIC - ADMINISTRATION (DIRECTOR) 
-##                                          1 
-##                                 ACCOUNTANT 
-##                                         10 
-##                                    ACTRESS 
-##                                          1 
-##                              ACUPUNCTURIST 
-##                                          1 
-##                            ADMIN ASSISTANT 
-##                                          5 
-##                   ADMINISTRATIVE ASSISTANT 
-##                                          1 
-##                              ADMINISTRATOR 
-##                                         11 
-##                    ADMINSTRATIVE ASSISTANT 
-##                                          6 
-##                                 ADULT CARE 
-##                                          1 
-##                                 AGRONOMIST 
-##                                          1 
-##                     AIRPORT GROUND HANDLER 
-##                                          1 
-##                                    ANALYST 
-##                                          5 
-##                             ANTIQUE DEALER 
-##                                          1 
-##                                  ARCHITECT 
-##                                          4 
-##                               ART DIRECTOR 
-##                                          2 
-##                                     ARTIST 
-##                                          9 
-##                           ARTIST - JEWELRY 
-##                                          1 
-##                                  ASSISTANT 
-##                                          1 
-##                        ASSISTANT PROFESSOR 
-##                                          3 
-##                                  ASSOCIATE 
-##                                          2 
-##                              ASTROHYSICIST 
-##                                          1 
-##                                   ATTORNEY 
-##                                         57 
-## ATTORNEY - SELF EMPLOYED FOR 2 YEARS Â<U+0080><U+0093> F 
-##                                          1 
-##                     ATTORNEY Â<U+0080><U+0093> ASSOCIATE 
-##                                          1 
-##                        AVIATION SPECIALIST 
-##                                          1 
-##                                    BANKING 
-##                                          2 
-##             BANKING - INVESTMENT ASSISTANT 
-##                                          1 
-##             BANKING - INVESTMENT ASSOCIATE 
-##                                          1 
-##                BANKING - INVESTMENT BANKER 
-##                                          1 
-##             BANKING - INVESTMENT COUNSELOR 
-##                                          1 
-##                           BANKING - TELLER 
-##                                          3 
-##                                  BARTENDER 
-##                                          1 
-##                                  BIOLOGIST 
-##                                          1 
-##                                 BOOKKEEPER 
-##                                          3 
-##                                 BOOKSELLER 
-##                                          1 
-##                  BOX OFFICE REPRESENTATIVE 
-##                                          1 
-##                                  BRAILLIST 
-##                                          1 
-##                             BUDGET ANALYST 
-##                                          1 
-##                        BUSINESS CONSULTANT 
-##                                          2 
-##            BUSINESS DEVELOPMENT - DIRECTOR 
-##                                          1 
-##             BUSINESS OWNER / SELF EMPLOYED 
-##                                         20 
-##                                      BUYER 
-##                                          1 
-##                       BUYER - ONLINE MEDIA 
-##                                          1 
-##                               CAD OPERATOR 
-##                                          1 
-##                             CAD TECHNICIAN 
-##                                          1 
-##                         CAMERA COORDINATOR 
-##                                          1 
-##                CASE COORDINATOR - CONSUMER 
-##                                          2 
-##                               CASE MANAGER 
-##                                          1 
-##                                    CASHIER 
-##                                          1 
-##             CATALOGUER /  FREELANCE ARTIST 
-##                                          1 
-##                                        CEO 
-##                                          5 
-##                                        CFO 
-##                                          1 
-##                                   CHAIRMAN 
-##                                          1 
-##                             CHIEF OF STAFF 
-##                                          2 
-##                               CHIROPRACTOR 
-##                                          1 
-##                              CIVIL SERVANT 
-##                                          3 
-##                                      CLERK 
-##                                          5 
-##                      CLINICAL PSYCHOLOGIST 
-##                                          1 
-##                CLINICAL RESEARCH ASSISTANT 
-##                                          1 
-##                   CLINICAL TRIAL ASSISTANT 
-##                                          1 
-##    CLUTTER CLEARER,  VIDEO EDITOR, CATERER 
-##                                          2 
-##                                COLLECTIONS 
-##                                          1 
-##                             COMMUNICATIONS 
-##                                          2 
-##                COMMUNICATIONS & PUBLISHING 
-##                                          1 
-##                               CONSTRUCTION 
-##                                          1 
-##                    CONSTRUCTION MANAGEMENT 
-##                                          1 
-##                                 CONSULTANT 
-##                                         12 
-##                             CONSULTANT SR. 
-##                                          1 
-##                         CONSULTING MANAGER 
-##                                          1 
-##             CONTRACT MANAGEMENT - DIRECTOR 
-##                                          1 
-##               CONTRACT/PROPOSAL - DIRECTOR 
-##                                          1 
-##                            COPY SUPERVISOR 
-##                                          1 
-##                                COPY WRITER 
-##                                          2 
-##                          CORPORATE TRAINER 
-##                                          2 
-##                        CORRECTIONS OFFICER 
-##                                          1 
-##             CORRECTIONS OFFICER - JUVENILE 
-##                                          1 
-##                                  COUNSELOR 
-##                                          2 
-##                   COUNSELOR - CAREER COACH 
-##                                          1 
-##               COUNSELOR - CAREER PLACEMENT 
-##                                          1 
-##                         COUNSELOR - SCHOOL 
-##                                          1 
-##                        CREATIVE CONSULTANT 
-##                                          1 
-##                          CREATIVE DIRECTOR 
-##                                          2 
-##                           CUSTOMER SERVICE 
-##                                          9 
-##                              DANCE TEACHER 
-##                                          1 
-##            DENTAL & DISABILITY COORDINATOR 
-##                                          1 
-##                                    DENTIST 
-##                                          2 
-##                            DEPUTY DIRECTOR 
-##                                          3 
-##                                   DESIGNER 
-##                                          4 
-##                                  DIETITIAN 
-##                                          1 
-##                       DIETITIAN - CLINICAL 
-##                                          1 
-##                                   DIRECTOR 
-##                                         13 
-##                 DIRECTOR,SOCIAL DVELOPMENT 
-##                                          1 
-##                                 DISHWASHER 
-##                                          1 
-##   DOCTORAL CANDIDATE!!!  NO WONDER I'M DOI 
-##                                          1 
-##                                     DRIVER 
-##                                          3 
-##                                DRUG SAFETY 
-##                                          1 
-##                         ECOLOGY TECHNICIAN 
-##                                          1 
-##                                  ECONOMIST 
-##                                          2 
-##                                     EDITOR 
-##                                         21 
-##                         EDITOR - FREELANCE 
-##                                          1 
-##                  EDITOR - SPECIAL PROJECTS 
-##                                          1 
-##                          ELECTION SERVICES 
-##                                          1 
-##                                ELECTRICIAN 
-##                                          1 
-##                      ELECTRONIC TECHNICIAN 
-##                                          1 
-##                                        EMT 
-##                                          1 
-##                                   ENGINEER 
-##                                         32 
-##                           ENGINEER - AUDIO 
-##                                          1 
-##                     ENGINEER - DEVELOPMENT 
-##                                          1 
-##                      ENGINEER - MECHANICAL 
-##                                          1 
-##                         ENGINEER - PROCESS 
-##                                          1 
-##                                  ENOLOGIST 
-##                                          1 
-##                                ENTERTAINER 
-##                                          1 
-##         ENVIRONMENTAL - ANALYTICAL MANAGER 
-##                                          1 
-##       ENVIRONMENTAL - EDUCATION/NON PROFIT 
-##                                          1 
-##                ENVIRONMENTAL - EHS MANAGER 
-##                                          1 
-##                      ENVIRONMENTAL ANALYST 
-##                                          1 
-##                     ENVIRONMENTAL ENGINEER 
-##                                          1 
-##                   ENVIRONMENTAL SPECIALIST 
-##                                          1 
-##                                  EXECUTIVE 
-##                                          1 
-##                        EXECUTIVE ASSISTANT 
-##                                          2 
-##                         EXECUTIVE DIRECTOR 
-##                                          2 
-##                          EXECUTIVE OFFICER 
-##                                          1 
-##                                FACILITATOR 
-##                                          1 
-##                      FACILITIES MANAGEMENT 
-##                                          1 
-##                               FARM MANAGER 
-##                                          1 
-##                          FIELD COORDINATOR 
-##                                          1 
-##                    FILM - CASTING DIRECTOR 
-##                                          1 
-##                              FILM - EDITOR 
-##                                          1 
-##                               FILM - MAKER 
-##                                          1 
-##                               FILM - OTHER 
-##                                          1 
-##                            FILM - PRODUCER 
-##                                          1 
-##               FILM/TV - ASSOCIATE DIRECTOR 
-##                                          1 
-##               FILM/TV - ASSOCIATE PRODUCER 
-##                                          1 
-##                                    FINANCE 
-##                                          5 
-##                          FINANCIAL ADVISOR 
-##                                         11 
-##                          FINANCIAL ANALYST 
-##                                          2 
-##                       FINANCIAL CONSULTANT 
-##                                          1 
-##                       FINANCIAL CONTROLLER 
-##                                          2 
-##                          FINANCIAL OFFICER 
-##                                          1 
-##                     FINANCIAL RISK MANAGER 
-##                                          1 
-##                         FITNESS INSTRUCTOR 
-##                                          1 
-##       FITNESS INSTRUCTOR - WELLNESS MENTOR 
-##                                          1 
-##                             FLIGHT SURGEON 
-##                                          1 
-##                   FOOD DEPARTMENT DIRECTOR 
-##                                          1 
-##                    FOOD SERVICE SUPERVISOR 
-##                                          1 
-##                            FOREIGN AFFAIRS 
-##                                          2 
-##                 FOREIGN AFFAIRS SPECIALIST 
-##                                          1 
-##                                     FRAMER 
-##                                          1 
-##             FURNITURE MAKER, HOME RESTORER 
-##                                          1 
-##                                  GEOLOGIST 
-##                                          2 
-##                               GEOPHYSICIST 
-##                                          1 
-##                         GRADUATE ASSISTANT 
-##                                          5 
-##              GRADUATE ASSISTANT - RESEARCH 
-##                                          2 
-##                       GRANTS ADMINISTRATOR 
-##                                          1 
-##                           GRAPHIC DESIGNER 
-##                                         11 
-##          GROCERY STORE - PRODUCE ASSOCIATE 
-##                                          1 
-##                     GROCERY STORE SALESMAN 
-##                                          1 
-##                              GROUNDSKEEPER 
-##                                          1 
-##                                 HEALTHCARE 
-##                                          1 
-##                    HEALTHCARE - CONSULTANT 
-##                                          1 
-##                                 HOME-MAKER 
-##                                          1 
-##                                 HOME MAKER 
-##                                         29 
-##                   HOSPITALITY - DESK CLERK 
-##                                          1 
-##                 HOSPITALITY - HOUSEKEEPING 
-##                                          1 
-##                    HOSPITALITY - INNKEEPER 
-##                                          1 
-##                              HR CONSULTANT 
-##                                          1 
-##                              HR GENERALIST 
-##                                          1 
-##                                 HR MANAGER 
-##                                          4 
-##                                  HVAC TECH 
-##                                          1 
-##                               ICT DIRECTOR 
-##                                          1 
-##                         INSTRUCTOR - COACH 
-##                                          1 
-##              INSTRUCTOR - ONLINE ASSISTANT 
-##                                          1 
-##                                  INSURANCE 
-##                                          2 
-##                            INSURANCE AGENT 
-##                                          4 
-##               INSURANCE BROKER'S ASSISTANT 
-##                                          1 
-##                INSURANCE CLAIMS SUPERVISOR 
-##                                          1 
-##                      INSURANCE COORDINATOR 
-##                                          1 
-##                   INVESTIGATIVE SPECIALIST 
-##                                          1 
-##                                         IT 
-##                                          3 
-##                             IT - ASSISTANT 
-##                                          1 
-##                          IT - CIO (DEPUTY) 
-##                                          1 
-##                            IT - CONSULTANT 
-##                                          5 
-##                                   IT - CTO 
-##                                          1 
-##                              IT - DIRECTOR 
-##                                          1 
-##                           IT - DW ENGINEER 
-##                                          1 
-##                               IT - MANAGER 
-##                                          2 
-##                     IT - SOFTWARE ENGINEER 
-##                                          5 
-##                      IT - SUPPORT ENGINEER 
-##                                          3 
-##                       IT - SYSTEMS ANALYST 
-##                                          6 
-##                  IT - TRAINING COORDINATOR 
-##                                          1 
-##                           IT ADMINISTRATOR 
-##                                          2 
-##                                 IT ANALYST 
-##                                          1 
-##                               IT ASSISTANT 
-##                                          1 
-##                              IT CONSULTANT 
-##                                          4 
-##                                IT DIRECTOR 
-##                                          2 
-##                                IT ENGINEER 
-##                                          1 
-##                                 IT MANAGER 
-##                                          1 
-##                        IT NETWORK ENGINEER 
-##                                          3 
-##                 IT PROGRAMMER - CONSULTANT 
-##                                          1 
-##                     IT SECURITY CONSULTANT 
-##                                          1 
-##                       IT SOFTWARE ENGINEER 
-##                                         27 
-##                   IT SOFTWARE PROFESSIONAL 
-##                                          2 
-##                              IT SPECIALIST 
-##                                          2 
-##                        IT SUPPORT ENGINEER 
-##                                          2 
-##                         IT SYSTEMS ANALYST 
-##                                          7 
-##                                    JANITOR 
-##                                          1 
-##                                 JOURNALIST 
-##                                          8 
-##                             LAB  ASSISTANT 
-##                                          1 
-##                               LAB DIRECTOR 
-##                                          1 
-##                             LAB TECHNICIAN 
-##                                          2 
-##                 LABOR RELATIONS SPECIALIST 
-##                                          1 
-##                         LANDSCAPE DESIGNER 
-##                                          1 
-##                LANGUAGE - PROGRAM DIRECTOR 
-##                                          1 
-##              LANGUAGE AND SPEECH ASSISTANT 
-##                                          1 
-##                  LANGUAGE SERVICE PROVIDER 
-##                                          1 
-##                           LANGUAGE TRAINER 
-##                                          1 
-##                            LAW ENFORCEMENT 
-##                                          3 
-##                            LEGAL ASSISTANT 
-##                                          3 
-##           LEGAL ASSISTANT / OFFICE MANAGER 
-##                                          1 
-##                                LEGAL CLERK 
-##                                          2 
-##                            LEGAL SECRETARY 
-##                                          1 
-##                        LEGISLATION ANALYST 
-##                                          1 
-##                             LETTER CARRIER 
-##                                          2 
-##                                  LIBRARIAN 
-##                                         12 
-##                        LIBRARIAN ASSISTANT 
-##                                          1 
-##            LICENSED PROFESSIONAL COUNSELOR 
-##                                          1 
-##                                 LIFE GUARD 
-##                                          1 
-##                      MAINTENANCE TECHNICAN 
-##                                          1 
-##                      MANAGEMENT CONSULTANT 
-##                                          2 
-##                                    MANAGER 
-##                                         33 
-##                  MANAGER,INTERACITVE MEDIA 
-##                                          1 
-##                              MANUFACTURING 
-##                                          1 
-##                                  MARKETING 
-##                                         21 
-##                 MARKETING - COMMUNICATIONS 
-##                                          1 
-##                       MARKETING COPYWRITER 
-##                                          2 
-##                 MARKETING RESEARCH ANALYST 
-##                                          7 
-##                          MASSAGE THERAPIST 
-##                                          1 
-##                    MASTER CONTROL OPERATOR 
-##                                          1 
-##              MEDIA & INTERNET - CONSULTANT 
-##                                          1 
-##                           MEDIA CONSULTANT 
-##                                          1 
-##                    MEDIA RELATIONS MANAGER 
-##                                          1 
-##            MEDIA RELATIONS/SCIENCE WRITING 
-##                                          1 
-##                                    MEDICAL 
-##                                          1 
-##           MEDICAL / PUBLIC HEALTH EDUCATOR 
-##                                          1 
-##                         MEDICAL LABORATORY 
-##                                          1 
-##                       MEDICAL PRACTITIONER 
-##                                          1 
-##                        MEDICAL SONOGRAPHER 
-##                                          1 
-##                   MEDICAL TRANSCRIPTIONIST 
-##                                          1 
-##               MENTOR/SPECIAL EVENTS INTERN 
-##                                          1 
-##              MERCHANDISER - PHARMACEUTICAL 
-##                                          1 
-##                                   MILITARY 
-##                                          1 
-##    MILITARY - EXPLOSIVE ORDINANCE DISPOSAL 
-##                                          1 
-##                                      MOVER 
-##                                          1 
-##                       MULTIMEDIA DEVELOPER 
-##                                          1 
-##                              MUSEUM DOCENT 
-##                                          1 
-##                                   MUSICIAN 
-##                                          5 
-##                                      NANNY 
-##                                          6 
-##                         NEWSPAPER DELIVERY 
-##                                          1 
-##    NIGHT DISPATCH SUPERVISOR  (IT'S JUST A 
-##                                          1 
-##                      NON-PROFIT CONSULTANT 
-##                                          1 
-##                      NON PROFIT - DIRECTOR 
-##                                          2 
-##                                      NURSE 
-##                                         13 
-##                                 NURSE - RN 
-##                                          4 
-##              NURSING - CERTIFIED ASSISTANT 
-##                                          1 
-## NURSING - CERTIFIED REGISTERED ANESTHETIST 
-##                                          1 
-##               NURSING - LICENSED PRACTICAL 
-##                                          1 
-##                               NURSING HOME 
-##                                          1 
-##                               OFFICE ADMIN 
-##                                          2 
-##                           OFFICE ASSISTANT 
-##                                          1 
-##                             OFFICE MANAGER 
-##                                          3 
-##                   OPERATIONS - COORDINATOR 
-##                                          1 
-##                      OPERATIONS - DIRECTOR 
-##                                          1 
-##    OPERATIONS - PRODUCTION SUPPORT ANALYST 
-##                                          1 
-##                            OPERATIONS & QA 
-##                                          1 
-##                         OPERATIONS MANAGER 
-##                                          4 
-##                   ORGANIZER - PROFESSIONAL 
-##                                          1 
-##             OUTDOOR RECREATION COORDINATOR 
-##                                          1 
-##                                  PARALEGAL 
-##                                          2 
-##                PASTOR ; LIFE COACH  CLERGY 
-##                                          5 
-##                                  PATHOLOGY 
-##                                          1 
-##                         PCA - QUADRIPLEGIC 
-##                                          1 
-##                           PERSONAL TRAINER 
-##                                          1 
-##                                 PHARMACIST 
-##                                          4 
-##                               PHOTOGRAPHER 
-##                                          3 
-##                PHYSICAL SCIENCE TECHNICIAN 
-##                                          1 
-##                         PHYSICAL THERAPIST 
-##                                          1 
-##                                  PHYSICIAN 
-##                                         17 
-##                 PHYSICIAN - EPIDEMIOLOGIST 
-##                                          2 
-##                         PHYSICIAN - INTERN 
-##                                          1 
-##                      PHYSICIAN - POST GRAD 
-##                                          1 
-##                       PHYSICIAN - RESEARCH 
-##                                          1 
-##                                  PHYSICIST 
-##                                          1 
-##                             PHYSIOTHERAPST 
-##                                          1 
-##                           PLANNER - CAMPUS 
-##                                          1 
-##                         PLANNER - LAND USE 
-##                                          1 
-##                             PLANNER - TOWN 
-##                                          1 
-##                            PLANNER - URBAN 
-##                                          1 
-##               PLANT ENGINEERING SUPERVISOR 
-##                                          1 
-##                             POLICY ADVISOR 
-##                                          1 
-##                             POLICY ANALYST 
-##                                          2 
-##                                  PRESIDENT 
-##                                          8 
-##                            PRESIDENT - NGO 
-##                                          1 
-##                              PRESS OFFICER 
-##                                          2 
-##                                     PRIEST 
-##                                          1 
-##                   PRIVATE EQUITY PRINCIPAL 
-##                                          1 
-##         PRO POKER PLAYER /   WEBSITE OWNER 
-##                                          1 
-##                          PROBATION OFFICER 
-##                                          1 
-##                 PRODUCT FIELD TEST MANAGER 
-##                                          1 
-##                                  PROFESSOR 
-##                                         61 
-##                            PROGRAM ANALYST 
-##                                          1 
-##                          PROGRAM ASSISTANT 
-##                                          1 
-##                        PROGRAM COORDINATOR 
-##                                          2 
-##             PROGRAM DEVELOPMENT SPECIALIST 
-##                                          1 
-##                           PROGRAM DIRECTOR 
-##                                          1 
-##   PROGRAM DIRECTOR AT A NON-PROFIT ORGANIZ 
-##                                          1 
-##                            PROGRAM MANAGER 
-##                                          1 
-##        PROGRAM MANAGER AND ACTING DIRECTOR 
-##                                          1 
-##                            PROGRAM OFFICER 
-##                                          1 
-##                         PROGRAM SPECIALIST 
-##                                          1 
-##                            PROJECT MANAGER 
-##                                         12 
-##                                PROOFREADER 
-##                                          1 
-##           PSYCHIATRIST IN PRIVATE PRACTICE 
-##                                          1 
-##                               PSYCHOLOGIST 
-##                                          7 
-##                            PSYCHOTHERAPIST 
-##                                          3 
-##                              PUBLIC HEALTH 
-##                                          1 
-##                 PUBLIC HEALTH - CONSULTANT 
-##                                          1 
-##          PUBLIC INFORMATION - DEPUTY CHIEF 
-##                                          1 
-##                           PUBLIC RELATIONS 
-##                                          4 
-##                                 PUBLISHING 
-##                                          1 
-##                            QUALITY MANAGER 
-##                                          1 
-##                      QUOTATIONS SPECIALIST 
-##                                          1 
-##                          REAL ESTATE AGENT 
-##                                          3 
-##                      REAL ESTATE APPRAISER 
-##                                          1 
-##                      REAL ESTATE DEVELOPER 
-##                                          1 
-##                                    REALTOR 
-##                                          2 
-##                               RECEPTIONIST 
-##                                          3 
-##                            RECORDS ANALYST 
-##                                          1 
-##                         RECREATIONAL STAFF 
-##                                          1 
-##                         REGULATORY AFFAIRS 
-##                                          1 
-##                                  RENOVATOR 
-##                                          1 
-##                         REPORTER - TRAFFIC 
-##                                          1 
-##                     RESEARCH / GIS ANALYST 
-##                                          1 
-##                           RESEARCH ANALYST 
-##                                          1 
-##                         RESEARCH ASSISTANT 
-##                                          9 
-##                         RESEARCH ASSOCIATE 
-##                                          4 
-##                       RESEARCH COORDINATOR 
-##                                          1 
-##                            RESEARCH INTERN 
-##                                          1 
-##                           RESEARCH MANAGER 
-##                                          1 
-##                           RESEARCH SCHOLAR 
-##                                          1 
-##                         RESEARCH SCIENTIST 
-##                                          8 
-##                        RESEARCH SPECIALIST 
-##                                          1 
-##                        RESEARCH TECHNICIAN 
-##                                          1 
-##                RESEARCH/TEACHING ASSISTANT 
-##                                          1 
-##                                 RESEARCHER 
-##                                          3 
-##                      RESEARCHER - GRADUATE 
-##                                          1 
-##                     RESEARCHER - PHYSICIAN 
-##                                          1 
-##                 RESEARCHER - POST DOCTORAL 
-##                                          1 
-##          RESIDENTIAL SERVICES - SUPERVISOR 
-##                                          1 
-##            RESIDENTIAL SERVICES SUPERVISOR 
-##                                          1 
-##                    RESPIRATORY - THERAPIST 
-##                                          1 
-##                      RESPIRATORY THERAPIST 
-##                                          1 
-##                   RESTAURANT - FOOD SERVER 
-##                                         10 
-##                  RESTAURANT - HOST/HOSTESS 
-##                                          2 
-##                     RESTAURANT & BAR OWNER 
-##                                          1 
-##                RESTAURANT OPERATIONS - MGR 
-##                                          1 
-##              RESTAURANT OPERATIONS MANAGER 
-##                                          1 
-##                                     RETAIL 
-##                                          5 
-##                                    RETIRED 
-##                                         26 
-##                                      SALES 
-##                                          4 
-##                    SALES - ACCOUNT MANAGER 
-##                                          1 
-##                    SALES - ACCOUNT PLANNER 
-##                                          1 
-##                        SALES - ACCOUNT REP 
-##                                          1 
-##      SALES - CLIENT RELATIONSHIP ASSISTANT 
-##                                          1 
-##                            SALES - MANAGER 
-##                                          1 
-##                            SALES - MEDICAL 
-##                                          1 
-##                           SALES - SOFTWARE 
-##                                          2 
-##                            SALES EXECUTIVE 
-##                                          1 
-##                               SALES EXPERT 
-##                                          1 
-##                            SALES INSURANCE 
-##                                          1 
-##                              SALES MANAGER 
-##                                          3 
-##                                  SALES REP 
-##                                          3 
-##                      SALES/ DAYCARE WORKER 
-##                                          1 
-##                    SCIENTIFIC AFFAIRS - VP 
-##                                          1 
-##                                  SCIENTIST 
-##                                         12 
-##                         SCIENTIST - ROCKET 
-##                                          1 
-##                                  SECRETARY 
-##                                          1 
-##                              SELF EMPLOYED 
-##                                          1 
-##                       SENIOR GRANT OFFICER 
-##                                          1 
-##                       SERVICE CO-ORDINATOR 
-##                                          1 
-##                               SET DESIGNER 
-##                                          1 
-##                    SET LIGHTING TECHNICIAN 
-##                                          1 
-##                    SOCIAL MEDIA CONSULTANT 
-##                                          1 
-##                      SOCIAL POLICY ANALYST 
-##                                          1 
-##                         SOCIAL WORK INTERN 
-##                                          1 
-##                              SOCIAL WORKER 
-##                                          7 
-##                   SOCIAL WORKER - HANDICAP 
-##                                          1 
-##                  SPEAKER AUTHOR CONSULTANT 
-##                                          1 
-##                              SPEAKER/ACTOR 
-##                                          1 
-##   SPECIAL EDUCATION ADMINISTRATIVE ASSISTA 
-##                                          1 
-##                  SPECIAL EDUCATION TEACHER 
-##                                          4 
-##                               STATISTICIAN 
-##                                          1 
-##                            STEAMSHIP AGENT 
-##                                          1 
-##                                    STOCKER 
-##                                          2 
-##                                    STUDENT 
-##                                          9 
-##                    STUDENT - POST DOCTORAL 
-##                                          2 
-##                STUDENT / WORKING PART-TIME 
-##                                          1 
-##       STUDENT AND ADMINISTRATIVE ASSISTANT 
-##                                          1 
-##            STUDENT AND PART TIME SECRETARY 
-##                                          1 
-##                STUDENT AND PRIVATE CURATOR 
-##                                          1 
-##        STUDENT CHILDHOOD AND YOUTH STUDIES 
-##                                          1 
-##  STUDENT FYSIOTHERAPY /HOME CARE / MASSAGE 
-##                                          1 
-##      STUDENT PART-TIME AND SALES FULL-TIME 
-##                                          1 
-##                            STUDENT/BARMAID 
-##                                          1 
-##                           STUDENT/IMVESTOR 
-##                                          1 
-##                             STUDENT/RETAIL 
-##                                          1 
-##                            STUDENT/TEACHER 
-##                                          1 
-##                             STUDENT/WAITER 
-##                                          1 
-##                                    SURGEON 
-##                                          1 
-##                         SURGEON - RESIDENT 
-##                                          1 
-##                                TAX AUDITOR 
-##                                          1 
-##                             TAX CONSULTANT 
-##                                          1 
-##                               TAX EXAMINER 
-##                                          1 
-##                                    TEACHER 
-##                                         85 
-##     TEACHER'S ASSISTANT/AFTERSCHOOL LEADER 
-##                                          1 
-##                    TEACHER / ADMINISTRATOR 
-##                                          1 
-##     TEACHER AND FULL TIME DOCTORAL STUDENT 
-##                                          1 
-##                          TEACHER ASSISTANT 
-##                                          3 
-##        TEACHING ASSISTANT/GRADUATE STUDENT 
-##                                          1 
-##                           TECH ANALYST/GIS 
-##                                          1 
-##                      TECHNICAL COORDINATOR 
-##                                          1 
-##                         TECHNICAL DIRECTOR 
-##                                          1 
-##                          TECHNICAL OFFICER 
-##                                          1 
-##                          TECHNICAL SUPPORT 
-##                                          1 
-##                      TECHNICAL SUPPORT REP 
-##                                          1 
-##                          TECHNICAL TRAINER 
-##                                          1 
-##                           TECHNICAL WRITER 
-##                                          4 
-##    TECHNOLOGY CURRICULUM DEVELOPER SCIENCE 
-##                                          1 
-##                        TELEVISION DIRECTOR 
-##                                          1 
-##                        TELEVISION PRODUCER 
-##                                          1 
-##                    THEATER ARTIST/ TEACHER 
-##                                          1 
-##                    THEATER GENERAL MANAGER 
-##                                          1 
-##                         THERAPIST - ENERGY 
-##                                          1 
-##                         THERAPIST - FAMILY 
-##                                          1 
-##                                 TOUR GUIDE 
-##                                          1 
-##                                 TOWN CLERK 
-##                                          1 
-##                                     TRADER 
-##                                          1 
-##                       TRAINING -  SOFTWARE 
-##                                          1 
-##                       TRAINING COORDINATOR 
-##                                          2 
-##                                 TRANSLATOR 
-##                                          7 
-##                   TRANSLATOR / INTERPRETER 
-##                                          1 
-##             TREATMENT SUPPORT CO-ORDINATOR 
-##                                          1 
-##                                      TUTOR 
-##                                          5 
-##                    TV BROADCAST TECHNICIAN 
-##                                          1 
-##                 TV NEWS EXECUTIVE PRODUCER 
-##                                          1 
-##                                 UNEMPLOYED 
-##                                         18 
-##                    VETERANS REPRESENTATIVE 
-##                                          1 
-##                               VETERINARIAN 
-##                                          2 
-##                             VICE-PRESIDENT 
-##                                          2 
-##                             VICE PRESIDENT 
-##                                          2 
-##            VICE PRESIDENT / PROGRAM OFFICE 
-##                                          1 
-##                               VIDEOGRAPHER 
-##                                          1 
-##                              VISUAL ARTIST 
-##                                          1 
-##                         VOLUNTEER DIRECTOR 
-##                                          1 
-##             VOLUNTEER MENTAL HEALTH WORKER 
-##                                          1 
-##                                  WAREHOUSE 
-##                                          1 
-##                       WAREHOUSE SUPERVISOR 
-##                                          1 
-##                                WAREHOUSING 
-##                                          1 
-##                         WEB COMMUNICATIONS 
-##                                          1 
-##                               WEB DESIGNER 
-##                                          4 
-##                 WEBMASTER / PRINT DESIGNER 
-##                                          1 
-##                               WIG DESIGNER 
-##                                          1 
-##                                     WRITER 
-##                                         20 
-##                  WRITER - SCIENCE (INTERN) 
-##                                          1 
-##                           WRITER - TESTING 
-##                                          1 
-##     WRITER & DIRECTOR OF CONTENT SOLUTIONS 
-##                                          1 
-##                           WRITER / EDUCTOR 
-##                                          1 
-##             WRITER / LECTURER / CONSULTANT 
-##                                          1 
-##          WRITER / WEB DESIGNER/ WEB-MASTER 
-##                                          1 
-##           WRITER AND MANAGEMENT CONSULTANT 
-##                                          1 
-##                  WRITER/AUTHOR - FREELANCE 
-##                                          2 
-##                              WRITER/EDITOR 
-##                                          2 
-##                     WRITER/EDITOR/MUSICIAN 
-##                                          1 
-##                            WRITER/MUSICIAN 
-##                                          1 
-##                         WRITING CONSULTANT 
-##                                          2 
-##                               YOGA TEACHER 
-##                                          1
-```
-
-```r
-Country <- sqldf ("select Country, Count(Country) as Count
-                    from HDIMerged 
-                    Where Country<>'*Missing*'
-                    Group by Country 
-                    Order by Country") %>%
-            print()
-```
-
-```
-##               Country Count
-## 1         Afghanistan     3
-## 2             Albania     2
-## 3             Algeria     3
-## 4             Andorra     1
-## 5             Antigua     1
-## 6           Argentina     3
-## 7           Australia    99
-## 8             Austria     3
-## 9             Bahamas     1
-## 10           Barbados     1
-## 11            Belgium     9
-## 12            Bermuda     2
-## 13            Bolivia     1
-## 14           Botswana     1
-## 15             Brazil    20
-## 16           Bulgaria     2
-## 17             Canada   243
-## 18              Chile     4
-## 19              China    12
-## 20           Colombia     2
-## 21            Croatia     4
-## 22             Cyprus     1
-## 23     Czech Republic     3
-## 24            Denmark     9
-## 25 Dominican Republic     1
-## 26            Ecuador     3
-## 27              Egypt     1
-## 28        El Salvador     1
-## 29            Finland    12
-## 30             France    13
-## 31            Germany    36
-## 32              Ghana     2
-## 33             Greece    10
-## 34               Guam     1
-## 35             Guyana     1
-## 36          Hong Kong     7
-## 37            Hungary     1
-## 38            Iceland     1
-## 39              India    78
-## 40               Iran     2
-## 41            Ireland    19
-## 42             Israel    19
-## 43              Italy    60
-## 44            Jamaica     1
-## 45              Japan    13
-## 46              Kenya     1
-## 47          Lithuania     1
-## 48         Luxembourg     1
-## 49              Macao     1
-## 50          Macedonia     1
-## 51           Malaysia     4
-## 52              Malta     2
-## 53             Mexico    11
-## 54            Morocco     1
-## 55            Myanmar     1
-## 56        Netherlands    18
-## 57        New Zealand    12
-## 58          Nicaragua     1
-## 59             Norway    14
-## 60           Pakistan     1
-## 61             Panama     1
-## 62               Peru     2
-## 63        Philippines    11
-## 64             Poland     5
-## 65           Portugal     7
-## 66        Puerto Rico     3
-## 67              Qatar     1
-## 68            Romania     5
-## 69             Russia     1
-## 70       Saudi Arabia     2
-## 71          Singapore     4
-## 72           Slovenia     6
-## 73       South Africa    12
-## 74        South Korea     2
-## 75              Spain    13
-## 76          Sri Lanka     1
-## 77             Sweden    15
-## 78        Switzerland    11
-## 79             Taiwan     1
-## 80           Thailand     2
-## 81             Turkey     9
-## 82            Ukraine     2
-## 83     United Kingdom   177
-## 84      United States  2767
-## 85            Uruguay     3
-## 86          Venezuela     2
-## 87            Vietnam     1
-## 88         Yugoslavia     2
-```
-
-```r
-Matched <- sqldf ("select Count(1) as 'Matched'
-                    from HDIMerged 
-                    Where SelfProcrast=OthrProcrast
-                    ")
-
-dt <- mtcars[1:5, 1:6]
-kable(dt, "html")
-```
-
-<table>
- <thead>
-  <tr>
-   <th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-dt %>%
-kable("html") %>%
-kable_styling()
-```
-
-<table class="table" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = c("striped", "hover"))
-```
-
-<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = c("striped", "hover",
-"condensed"))
-```
-
-<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = c("striped", "hover",
-"condensed", "responsive"))
-```
-
-<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", full_width
-= F)
-```
-
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", full_width
-= F, position = "left")
+kable(GenderFreq, "html") %>%
+kable_styling("striped", full_width = F, position = "left" ) %>%
+column_spec(2, bold = T) %>%
+row_spec(3, bold = T, color = "white", background = "#D7261E")
 ```
 
 <table class="table table-striped" style="width: auto !important; ">
 <thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
+<th style="text-align:left;"> Gender </th>
+   <th style="text-align:right;"> Count </th>
   </tr></thead>
 <tbody>
 <tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
+<td style="text-align:left;"> Female </td>
+   <td style="text-align:right;font-weight: bold;"> 2295 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
+<td style="text-align:left;"> Male </td>
+   <td style="text-align:right;font-weight: bold;"> 1708 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
+<td style="text-align:left;font-weight: bold;color: white;background-color: #D7261E;"> *Missing* </td>
+   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #D7261E;"> 6 </td>
   </tr>
 </tbody>
 </table>
 
 ```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", full_width
-= F, position = "float_right")
+WrkStatusFreq <- sqldf("select WrkStatus, count(1) as Count
+                        from HDIMerged
+                        Group by WrkStatus
+                        Order by 2 desc")
+
+kable(WrkStatusFreq, "html") %>%
+kable_styling("striped", full_width = F, position = "left" ) %>%
+column_spec(2, bold = T) %>%
+row_spec(6, bold = T, color = "white", background = "#D7261E")
 ```
 
-<table class="table table-striped" style="width: auto !important; float: right; margin-left: 10px;">
+<table class="table table-striped" style="width: auto !important; ">
 <thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
+<th style="text-align:left;"> WrkStatus </th>
+   <th style="text-align:right;"> Count </th>
   </tr></thead>
 <tbody>
 <tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
+<td style="text-align:left;"> Full-Time </td>
+   <td style="text-align:right;font-weight: bold;"> 2259 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
+<td style="text-align:left;"> Student </td>
+   <td style="text-align:right;font-weight: bold;"> 837 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
+<td style="text-align:left;"> Part-Time </td>
+   <td style="text-align:right;font-weight: bold;"> 463 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
+<td style="text-align:left;"> Unemployed </td>
+   <td style="text-align:right;font-weight: bold;"> 257 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
+<td style="text-align:left;"> Retired </td>
+   <td style="text-align:right;font-weight: bold;"> 151 </td>
+  </tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: white;background-color: #D7261E;"> *Missing* </td>
+   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #D7261E;"> 42 </td>
   </tr>
 </tbody>
 </table>
 
 ```r
-kable(dt, "html") %>%
-kable_styling(bootstrap_options = "striped", font_size =
-7)
+Country <- sqldf ("select Country, Count(1) as Participants
+                    from HDIMerged
+                    Where Country<>'*Missing*'
+                    Group by Country
+                    Order by 2 desc")
+
+Country1 <- Country[1:30,]
+Country2 <- Country[31:60,]
+Country3 <- Country[61:90,]
+CountryCount <- cbind(Country1, Country2,Country3)
+
+kable(CountryCount, "html") %>%
+kable_styling("striped", full_width = F, position = "left" ) %>%
+column_spec(c(2,4,6), bold = T, background = "lightblue") 
 ```
 
-<table class="table table-striped" style="font-size: 7px; margin-left: auto; margin-right: auto;">
+<table class="table table-striped" style="width: auto !important; ">
 <thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
+<th style="text-align:left;"> Country </th>
+   <th style="text-align:right;"> Participants </th>
+   <th style="text-align:left;"> Country </th>
+   <th style="text-align:right;"> Participants </th>
+   <th style="text-align:left;"> Country </th>
+   <th style="text-align:right;"> Participants </th>
   </tr></thead>
 <tbody>
 <tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
+<td style="text-align:left;"> United States </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2767 </td>
+   <td style="text-align:left;"> Poland </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 5 </td>
+   <td style="text-align:left;"> Bahamas </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
+<td style="text-align:left;"> Canada </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 243 </td>
+   <td style="text-align:left;"> Romania </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 5 </td>
+   <td style="text-align:left;"> Barbados </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
+<td style="text-align:left;"> United Kingdom </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 177 </td>
+   <td style="text-align:left;"> Chile </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 4 </td>
+   <td style="text-align:left;"> Bolivia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
+<td style="text-align:left;"> Australia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 99 </td>
+   <td style="text-align:left;"> Croatia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 4 </td>
+   <td style="text-align:left;"> Botswana </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-text_tbl <- data.frame(
-Items = c("Item 1", "Item 2", "Item 3"),
-Features = c(
-"Lorem ipsum dolor sit amet, consectetur adipiscing el
-it. Proin vehicula tempor ex. Morbi malesuada sagittis tur
-pis, at venenatis nisl luctus a. ",
-"In eu urna at magna luctus rhoncus quis in nisl. Fusc
-e in velit varius, posuere risus et, cursus augue. Duis el
-eifend aliquam ante, a aliquet ex tincidunt in. ",
-"Vivamus venenatis egestas eros ut tempus. Vivamus id
-est nisi. Aliquam molestie erat et sollicitudin venenatis.
-In ac lacus at velit scelerisque mattis. "
-)
-)
-kable(text_tbl, "html") %>%
-kable_styling(full_width = F) %>%
-column_spec(1, bold = T, border_right = T) %>%
-column_spec(2, width = "30em", background = "yellow")
-```
-
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;"> Items </th>
-   <th style="text-align:left;"> Features </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;font-weight: bold;border-right:1px solid;"> Item 1 </td>
-   <td style="text-align:left;width: 30em; background-color: yellow;"> Lorem ipsum dolor sit amet, consectetur adipiscing el
-it. Proin vehicula tempor ex. Morbi malesuada sagittis tur
-pis, at venenatis nisl luctus a. </td>
+<td style="text-align:left;"> India </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 78 </td>
+   <td style="text-align:left;"> Malaysia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 4 </td>
+   <td style="text-align:left;"> Cyprus </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;font-weight: bold;border-right:1px solid;"> Item 2 </td>
-   <td style="text-align:left;width: 30em; background-color: yellow;"> In eu urna at magna luctus rhoncus quis in nisl. Fusc
-e in velit varius, posuere risus et, cursus augue. Duis el
-eifend aliquam ante, a aliquet ex tincidunt in. </td>
+<td style="text-align:left;"> Italy </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 60 </td>
+   <td style="text-align:left;"> Singapore </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 4 </td>
+   <td style="text-align:left;"> Dominican Republic </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;font-weight: bold;border-right:1px solid;"> Item 3 </td>
-   <td style="text-align:left;width: 30em; background-color: yellow;"> Vivamus venenatis egestas eros ut tempus. Vivamus id
-est nisi. Aliquam molestie erat et sollicitudin venenatis.
-In ac lacus at velit scelerisque mattis. </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling("striped", full_width = F) %>%
-column_spec(5:7, bold = T) %>%
-row_spec(3:5, bold = T, color = "white", background = "#
-D7261E")
-```
-
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;font-weight: bold;"> 110 </td>
-   <td style="text-align:right;font-weight: bold;"> 3.90 </td>
-   <td style="text-align:right;font-weight: bold;"> 2.620 </td>
+<td style="text-align:left;"> Germany </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 36 </td>
+   <td style="text-align:left;"> Afghanistan </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Egypt </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;font-weight: bold;"> 110 </td>
-   <td style="text-align:right;font-weight: bold;"> 3.90 </td>
-   <td style="text-align:right;font-weight: bold;"> 2.875 </td>
+<td style="text-align:left;"> Brazil </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 20 </td>
+   <td style="text-align:left;"> Algeria </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> El Salvador </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;font-weight: bold;color: white;background-color: #
-D7261E;"> Datsun 710 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 22.8 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 4 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 108 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 93 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 3.85 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 2.320 </td>
+<td style="text-align:left;"> Ireland </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 19 </td>
+   <td style="text-align:left;"> Argentina </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Guam </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;font-weight: bold;color: white;background-color: #
-D7261E;"> Hornet 4 Drive </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 21.4 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 6 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 258 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 110 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 3.08 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 3.215 </td>
+<td style="text-align:left;"> Israel </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 19 </td>
+   <td style="text-align:left;"> Austria </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Guyana </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;font-weight: bold;color: white;background-color: #
-D7261E;"> Hornet Sportabout </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 18.7 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 8 </td>
-   <td style="text-align:right;font-weight: bold;color: white;background-color: #
-D7261E;"> 360 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 175 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 3.15 </td>
-   <td style="text-align:right;font-weight: bold;font-weight: bold;color: white;background-color: #
-D7261E;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, format = "html") %>%
-kable_styling("striped", full_width = F) %>%
-row_spec(0, angle = -45)
-```
-
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);">   </th>
-   <th style="text-align:right;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);"> mpg </th>
-   <th style="text-align:right;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);"> cyl </th>
-   <th style="text-align:right;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);"> disp </th>
-   <th style="text-align:right;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);"> hp </th>
-   <th style="text-align:right;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);"> drat </th>
-   <th style="text-align:right;-webkit-transform: rotate(-45deg); -moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -o-transform: rotate(-45deg); transform: rotate(-45deg);"> wt </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
+<td style="text-align:left;"> Netherlands </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 18 </td>
+   <td style="text-align:left;"> Czech Republic </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Hungary </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
+<td style="text-align:left;"> Sweden </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 15 </td>
+   <td style="text-align:left;"> Ecuador </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Iceland </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
+<td style="text-align:left;"> Norway </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 14 </td>
+   <td style="text-align:left;"> Puerto Rico </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Jamaica </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
+<td style="text-align:left;"> France </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 13 </td>
+   <td style="text-align:left;"> Uruguay </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 3 </td>
+   <td style="text-align:left;"> Kenya </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
   </tr>
 <tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
+<td style="text-align:left;"> Japan </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 13 </td>
+   <td style="text-align:left;"> Albania </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Lithuania </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Spain </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 13 </td>
+   <td style="text-align:left;"> Bermuda </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Luxembourg </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> China </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 12 </td>
+   <td style="text-align:left;"> Bulgaria </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Macao </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Finland </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 12 </td>
+   <td style="text-align:left;"> Colombia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Macedonia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> New Zealand </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 12 </td>
+   <td style="text-align:left;"> Ghana </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Morocco </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> South Africa </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 12 </td>
+   <td style="text-align:left;"> Iran </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Myanmar </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Mexico </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 11 </td>
+   <td style="text-align:left;"> Malta </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Nicaragua </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Philippines </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 11 </td>
+   <td style="text-align:left;"> Peru </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Pakistan </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Switzerland </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 11 </td>
+   <td style="text-align:left;"> Saudi Arabia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Panama </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Greece </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 10 </td>
+   <td style="text-align:left;"> South Korea </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Qatar </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Belgium </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 9 </td>
+   <td style="text-align:left;"> Thailand </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Russia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Denmark </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 9 </td>
+   <td style="text-align:left;"> Ukraine </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Sri Lanka </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Turkey </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 9 </td>
+   <td style="text-align:left;"> Venezuela </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Taiwan </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Hong Kong </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 7 </td>
+   <td style="text-align:left;"> Yugoslavia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 2 </td>
+   <td style="text-align:left;"> Vietnam </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Portugal </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 7 </td>
+   <td style="text-align:left;"> Andorra </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> NA </td>
+  </tr>
+<tr>
+<td style="text-align:left;"> Slovenia </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 6 </td>
+   <td style="text-align:left;"> Antigua </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> 1 </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;font-weight: bold;background-color: lightblue;"> NA </td>
   </tr>
 </tbody>
 </table>
 
 ```r
-mtcars[1:10, 1:2] %>%
-mutate(
-car = row.names(.),
-# You don't need format = "html" if you have ever defined options(knitr.table.format)
+Matched <- sqldf ("select Count(1) as 'Yes'
+                    from HDIMerged
+                    Where SelfProcrast=OthrProcrast
+                    AND SelfProcrast='Yes'
+                    ")
 
-mpg = cell_spec(mpg, "html", color = ifelse(mpg > 20,
-"red", "blue")),
-cyl = cell_spec(cyl, "html", color = "white", align =
-"c", angle = 45,
-background = factor(cyl, c(4, 6, 8),
-c("#666666", "#999
-999", "#BBBBBB")))
-) %>%
-select(car, mpg, cyl) %>%
-kable("html", escape = F) %>%
-kable_styling("striped", full_width = F)
+#TOP 15 nations with average procrastination scores
+#5b
+
+# Aggregate the average DP Mean by country
+DPMeanByCountry <- select(HDIMerged, Country, DPMean) %>%
+                  filter(Country!="*Missing*") %>%
+                  aggregate(DPMean ~ Country, .,mean)
+
+# Distinct list of Country and HDI category
+HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory)) 
+
+# Merge the aggregate of DPMean and the distinct country and HDI category
+Top15ProcrastinatorsDP <- merge(DPMeanByCountry, HDICategoryByCountry, by = "Country", all.x = TRUE) %>%
+                            arrange(desc(DPMean)) %>%
+                            slice(1:15)
+
+# Round the aggregated mean to 2 decimal places
+Top15ProcrastinatorsDP$DPMean <- round(Top15ProcrastinatorsDP$DPMean, digits=2)
+
+# SQL code not required but used for validation
+Top15ProcrastinatorsDP <- sqldf("select Country, 
+                               HDICategory, 
+                               round(sum(DPMean)/count(DPMean),2) as DPMean
+                               from HDIMerged
+                               Where Country<>'*Missing*'
+                               Group by Country, HDICategory
+                               Order by DPMean desc") %>%
+                               slice(1:15)
+  
+# Bar graph using GGPLOT for Top 15 countries in descending order for DP mean
+ggplot(Top15ProcrastinatorsDP,aes(x=reorder(Country,-DPMean),y=DPMean, fill=HDICategory))+
+  geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
+  coord_cartesian(xlim = c(0,16), ylim = c(3, 4.25))+
+  xlab("Country") + 
+  ylab("DP Mean") + 
+  ggtitle("Country by Procrastination - DP Mean Score")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=10, angle = 90, hjust = 1, vjust = 0.5),
+  axis.title=element_text(size=12),
+  plot.title = element_text(size=15, hjust = 0.5, vjust = 1)) +
+  scale_color_gradient()+
+  scale_fill_brewer(palette="Set1")
 ```
 
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:left;"> car </th>
-   <th style="text-align:left;"> mpg </th>
-   <th style="text-align:left;"> cyl </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:left;"> <span style="color: red;">21</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #999
-999;text-align: c;">6</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:left;"> <span style="color: red;">21</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #999
-999;text-align: c;">6</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:left;"> <span style="color: red;">22.8</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #666666;text-align: c;">4</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:left;"> <span style="color: red;">21.4</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #999
-999;text-align: c;">6</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:left;"> <span style="color: blue;">18.7</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #BBBBBB;text-align: c;">8</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Valiant </td>
-   <td style="text-align:left;"> Valiant </td>
-   <td style="text-align:left;"> <span style="color: blue;">18.1</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #999
-999;text-align: c;">6</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Duster 360 </td>
-   <td style="text-align:left;"> Duster 360 </td>
-   <td style="text-align:left;"> <span style="color: blue;">14.3</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #BBBBBB;text-align: c;">8</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 240D </td>
-   <td style="text-align:left;"> Merc 240D </td>
-   <td style="text-align:left;"> <span style="color: red;">24.4</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #666666;text-align: c;">4</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 230 </td>
-   <td style="text-align:left;"> Merc 230 </td>
-   <td style="text-align:left;"> <span style="color: red;">22.8</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #666666;text-align: c;">4</span></span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 280 </td>
-   <td style="text-align:left;"> Merc 280 </td>
-   <td style="text-align:left;"> <span style="color: blue;">19.2</span> </td>
-   <td style="text-align:left;"> <span style="-webkit-transform: rotate(45deg); -moz-transform: rotate(45deg); -ms-transform: rotate(45deg); -o-transform: rotate(45deg); transform: rotate(45deg); display: inline-block; "><span style="color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: #999
-999;text-align: c;">6</span></span> </td>
-  </tr>
-</tbody>
-</table>
+![](CaseStudy22_files/figure-html/kable_formatting-1.png)<!-- -->
 
 ```r
-iris[1:10, ] %>%
-mutate_if(is.numeric, function(x) {
-cell_spec(x, "html", bold = T, color = spec_color(x, end = 0.9),
-font_size = spec_font_size(x))
-}) %>%
-mutate(Species = cell_spec(
-Species, "html", color = "white", bold = T,
-background = spec_color(1:10, end = 0.9, option = "A",
-direction = -1)
-)) %>%
-kable("html", escape = F, align = "c") %>%
-kable_styling("striped", full_width = F)
+#TOP 15 nations with average procrastination scores
+# 5c
+
+# Aggregate the average AIP Mean by country
+AIPMeanByCountry <- select(HDIMerged, Country, AIPMean) %>%
+                  filter(Country!="*Missing*") %>%
+                  aggregate(AIPMean ~ Country, .,mean)
+
+# Distinct list of Country and HDI category
+HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory)) 
+
+# Merge the aggregate of DPMean and the distinct country and HDI category
+Top15ProcrastinatorsAIP <- merge(AIPMeanByCountry, HDICategoryByCountry, by = "Country", all.x = TRUE) %>%
+                            arrange(desc(AIPMean)) %>%
+                            slice(1:15)
+
+# Round the aggregated mean to 2 decimal places
+Top15ProcrastinatorsAIP$AIPMean <- round(Top15ProcrastinatorsAIP$AIPMean, digits=2)
+
+# SQL code not required but used for validation
+Top15ProcrastinatorsAIP <- sqldf("select Country, 
+                               HDICategory, 
+                               round(sum(AIPMean)/count(AIPMean),2) as AIPMean
+                               from HDIMerged
+                               Where Country<>'*Missing*'
+                               Group by Country, HDICategory
+                               Order by AIPMean desc") %>%
+                               slice(1:15)
+
+# Bar graph using GGPLOT for Top 15 countries in descending order for AIP mean
+ggplot(Top15ProcrastinatorsAIP,aes(x=reorder(Country,-AIPMean),y=AIPMean, fill=HDICategory))+
+  geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
+  coord_cartesian(xlim = c(0,16), ylim = c(3, 4.75))+
+  xlab("Country") + 
+  ylab("AIP Mean") + 
+  ggtitle("Country by Procrastination - AIP Mean Score")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=10, angle = 90, hjust = 1, vjust = 0.5),
+  axis.title=element_text(size=12),
+  plot.title = element_text(size=15, hjust = 0.5, vjust = 1)) +
+  scale_color_gradient()+
+  scale_fill_brewer(palette="Set1")
 ```
 
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:center;"> Sepal.Length </th>
-   <th style="text-align:center;"> Sepal.Width </th>
-   <th style="text-align:center;"> Petal.Length </th>
-   <th style="text-align:center;"> Petal.Width </th>
-   <th style="text-align:center;"> Species </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(40, 174, 128, 1);font-size: 14px;">5.1</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(31, 154, 138, 1);font-size: 13px;">3.5</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(62, 75, 138, 1);font-size: 10px;">1.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(254, 206, 145, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">4.9</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(72, 34, 116, 1);font-size: 9px;">3</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(62, 75, 138, 1);font-size: 10px;">1.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(254, 160, 109, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(57, 87, 140, 1);font-size: 10px;">4.7</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(56, 88, 140, 1);font-size: 10px;">3.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(68, 1, 84, 1);font-size: 8px;">1.3</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(246, 110, 92, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(67, 62, 133, 1);font-size: 10px;">4.6</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(67, 62, 133, 1);font-size: 10px;">3.1</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">1.5</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(222, 73, 104, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(31, 154, 138, 1);font-size: 13px;">5</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(41, 175, 127, 1);font-size: 14px;">3.6</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(62, 75, 138, 1);font-size: 10px;">1.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(183, 55, 121, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(187, 223, 39, 1);font-size: 16px;">5.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(187, 223, 39, 1);font-size: 16px;">3.9</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(187, 223, 39, 1);font-size: 16px;">1.7</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(187, 223, 39, 1);font-size: 16px;">0.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(140, 41, 129, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(67, 62, 133, 1);font-size: 10px;">4.6</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">3.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(62, 75, 138, 1);font-size: 10px;">1.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(34, 168, 132, 1);font-size: 13px;">0.3</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(100, 26, 128, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(31, 154, 138, 1);font-size: 13px;">5</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">3.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">1.5</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(60, 15, 112, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(68, 1, 84, 1);font-size: 8px;">4.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(68, 1, 84, 1);font-size: 8px;">2.9</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(62, 75, 138, 1);font-size: 10px;">1.4</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(53, 96, 141, 1);font-size: 11px;">0.2</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(20, 14, 54, 1);">setosa</span> </td>
-  </tr>
-<tr>
-<td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">4.9</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(67, 62, 133, 1);font-size: 10px;">3.1</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(37, 131, 142, 1);font-size: 12px;">1.5</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: rgba(68, 1, 84, 1);font-size: 8px;">0.1</span> </td>
-   <td style="text-align:center;"> <span style=" font-weight: bold;color: white;border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(0, 0, 4, 1);">setosa</span> </td>
-  </tr>
-</tbody>
-</table>
+![](CaseStudy22_files/figure-html/kable_formatting-2.png)<!-- -->
 
-```r
-sometext <- strsplit(paste0(
-"You can even try to make some crazy things like this paragraph. ",
-"It may seem like a useless feature right now but it's so cool ",
-"and nobody can resist. ;)"
-), " ")[[1]]
-text_formatted <- paste(
-text_spec(sometext, "html", color = spec_color(1:length(
-sometext), end = 0.9),
-font_size = spec_font_size(1:length(sometext),
-begin = 5, end = 20)),
-collapse = " ")
-
-#To display the text, type `r text_formatted` outside of the chunk
-
-popover_dt <- data.frame(
-position = c("top", "bottom", "right", "left"),
-stringsAsFactors = FALSE
-)
-popover_dt$`Hover over these items` <- cell_spec(
-paste("Message on", popover_dt$position), # Cell texts
-popover = spec_popover(
-content = popover_dt$position,
-title = NULL, # title will add a Title Panel on top
-position = popover_dt$position
-))
-kable(popover_dt, "html", escape = FALSE) %>%
-kable_styling("striped", full_width = FALSE)
-```
-
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;"> position </th>
-   <th style="text-align:left;"> Hover over these items </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> top </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="top">Message on top</span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> bottom </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="bottom" data-content="bottom">Message on bottom</span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> right </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="right">Message on right</span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> left </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="left">Message on left</span> </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-popover_dt <- data.frame(
-position = c("top", "bottom", "right", "left"),
-stringsAsFactors = FALSE
-)
-popover_dt$`Hover over these items` <- cell_spec(
-paste("Message on", popover_dt$position), # Cell texts
-popover = spec_popover(
-content = popover_dt$position,
-title = NULL, # title will add a Title Panel on top
-position = popover_dt$position
-))
-kable(popover_dt, "html", escape = FALSE) %>%
-kable_styling("striped", full_width = FALSE)
-```
-
-<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;"> position </th>
-   <th style="text-align:left;"> Hover over these items </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> top </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="top">Message on top</span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> bottom </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="bottom" data-content="bottom">Message on bottom</span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> right </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="right">Message on right</span> </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> left </td>
-   <td style="text-align:left;"> <span style="" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="left">Message on left</span> </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling("striped") %>%
-add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2, "Group 3" = 2))
-```
-
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="border-bottom:hidden" colspan="1"></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 1</div></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 2</div></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 3</div></th>
-</tr>
-<tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(dt, "html") %>%
-kable_styling(c("striped", "bordered")) %>%
-add_header_above(c(" ", "Group 1" = 2, "Group 2" = 2, "Group 3" = 2)) %>%
-add_header_above(c(" ", "Group 4" = 4, "Group 5" = 2)) %>%
-add_header_above(c(" ", "Group 6" = 6))
-```
-
-<table class="table table-striped table-bordered" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="border-bottom:hidden" colspan="1"></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="6"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 6</div></th>
-</tr>
-<tr>
-<th style="border-bottom:hidden" colspan="1"></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="4"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 4</div></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 5</div></th>
-</tr>
-<tr>
-<th style="border-bottom:hidden" colspan="1"></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 1</div></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 2</div></th>
-<th style="text-align:center; border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;" colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">Group 3</div></th>
-</tr>
-<tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-  </tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-  </tr>
-</tbody>
-</table>
-
-```r
-kable(cbind(mtcars, mtcars), "html") %>%
-kable_styling() %>%
-scroll_box(width = "900px", height = "600px")
-```
-
-<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:600px; overflow-x: scroll; width:900px; "><table class="table" style="margin-left: auto; margin-right: auto;">
-<thead><tr>
-<th style="text-align:left;">   </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-   <th style="text-align:right;"> qsec </th>
-   <th style="text-align:right;"> vs </th>
-   <th style="text-align:right;"> am </th>
-   <th style="text-align:right;"> gear </th>
-   <th style="text-align:right;"> carb </th>
-   <th style="text-align:right;"> mpg </th>
-   <th style="text-align:right;"> cyl </th>
-   <th style="text-align:right;"> disp </th>
-   <th style="text-align:right;"> hp </th>
-   <th style="text-align:right;"> drat </th>
-   <th style="text-align:right;"> wt </th>
-   <th style="text-align:right;"> qsec </th>
-   <th style="text-align:right;"> vs </th>
-   <th style="text-align:right;"> am </th>
-   <th style="text-align:right;"> gear </th>
-   <th style="text-align:right;"> carb </th>
-  </tr></thead>
-<tbody>
-<tr>
-<td style="text-align:left;"> Mazda RX4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160.0 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-   <td style="text-align:right;"> 16.46 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160.0 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.620 </td>
-   <td style="text-align:right;"> 16.46 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Mazda RX4 Wag </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160.0 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-   <td style="text-align:right;"> 17.02 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 21.0 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 160.0 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.90 </td>
-   <td style="text-align:right;"> 2.875 </td>
-   <td style="text-align:right;"> 17.02 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Datsun 710 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108.0 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-   <td style="text-align:right;"> 18.61 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 108.0 </td>
-   <td style="text-align:right;"> 93 </td>
-   <td style="text-align:right;"> 3.85 </td>
-   <td style="text-align:right;"> 2.320 </td>
-   <td style="text-align:right;"> 18.61 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet 4 Drive </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258.0 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-   <td style="text-align:right;"> 19.44 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 258.0 </td>
-   <td style="text-align:right;"> 110 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.215 </td>
-   <td style="text-align:right;"> 19.44 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Hornet Sportabout </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360.0 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-   <td style="text-align:right;"> 17.02 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 18.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360.0 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.440 </td>
-   <td style="text-align:right;"> 17.02 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Valiant </td>
-   <td style="text-align:right;"> 18.1 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 225.0 </td>
-   <td style="text-align:right;"> 105 </td>
-   <td style="text-align:right;"> 2.76 </td>
-   <td style="text-align:right;"> 3.460 </td>
-   <td style="text-align:right;"> 20.22 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 18.1 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 225.0 </td>
-   <td style="text-align:right;"> 105 </td>
-   <td style="text-align:right;"> 2.76 </td>
-   <td style="text-align:right;"> 3.460 </td>
-   <td style="text-align:right;"> 20.22 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Duster 360 </td>
-   <td style="text-align:right;"> 14.3 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360.0 </td>
-   <td style="text-align:right;"> 245 </td>
-   <td style="text-align:right;"> 3.21 </td>
-   <td style="text-align:right;"> 3.570 </td>
-   <td style="text-align:right;"> 15.84 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 14.3 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 360.0 </td>
-   <td style="text-align:right;"> 245 </td>
-   <td style="text-align:right;"> 3.21 </td>
-   <td style="text-align:right;"> 3.570 </td>
-   <td style="text-align:right;"> 15.84 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 240D </td>
-   <td style="text-align:right;"> 24.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 146.7 </td>
-   <td style="text-align:right;"> 62 </td>
-   <td style="text-align:right;"> 3.69 </td>
-   <td style="text-align:right;"> 3.190 </td>
-   <td style="text-align:right;"> 20.00 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 24.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 146.7 </td>
-   <td style="text-align:right;"> 62 </td>
-   <td style="text-align:right;"> 3.69 </td>
-   <td style="text-align:right;"> 3.190 </td>
-   <td style="text-align:right;"> 20.00 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 230 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 140.8 </td>
-   <td style="text-align:right;"> 95 </td>
-   <td style="text-align:right;"> 3.92 </td>
-   <td style="text-align:right;"> 3.150 </td>
-   <td style="text-align:right;"> 22.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 22.8 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 140.8 </td>
-   <td style="text-align:right;"> 95 </td>
-   <td style="text-align:right;"> 3.92 </td>
-   <td style="text-align:right;"> 3.150 </td>
-   <td style="text-align:right;"> 22.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 280 </td>
-   <td style="text-align:right;"> 19.2 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 167.6 </td>
-   <td style="text-align:right;"> 123 </td>
-   <td style="text-align:right;"> 3.92 </td>
-   <td style="text-align:right;"> 3.440 </td>
-   <td style="text-align:right;"> 18.30 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 19.2 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 167.6 </td>
-   <td style="text-align:right;"> 123 </td>
-   <td style="text-align:right;"> 3.92 </td>
-   <td style="text-align:right;"> 3.440 </td>
-   <td style="text-align:right;"> 18.30 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 280C </td>
-   <td style="text-align:right;"> 17.8 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 167.6 </td>
-   <td style="text-align:right;"> 123 </td>
-   <td style="text-align:right;"> 3.92 </td>
-   <td style="text-align:right;"> 3.440 </td>
-   <td style="text-align:right;"> 18.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 17.8 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 167.6 </td>
-   <td style="text-align:right;"> 123 </td>
-   <td style="text-align:right;"> 3.92 </td>
-   <td style="text-align:right;"> 3.440 </td>
-   <td style="text-align:right;"> 18.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 450SE </td>
-   <td style="text-align:right;"> 16.4 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 275.8 </td>
-   <td style="text-align:right;"> 180 </td>
-   <td style="text-align:right;"> 3.07 </td>
-   <td style="text-align:right;"> 4.070 </td>
-   <td style="text-align:right;"> 17.40 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 16.4 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 275.8 </td>
-   <td style="text-align:right;"> 180 </td>
-   <td style="text-align:right;"> 3.07 </td>
-   <td style="text-align:right;"> 4.070 </td>
-   <td style="text-align:right;"> 17.40 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 450SL </td>
-   <td style="text-align:right;"> 17.3 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 275.8 </td>
-   <td style="text-align:right;"> 180 </td>
-   <td style="text-align:right;"> 3.07 </td>
-   <td style="text-align:right;"> 3.730 </td>
-   <td style="text-align:right;"> 17.60 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 17.3 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 275.8 </td>
-   <td style="text-align:right;"> 180 </td>
-   <td style="text-align:right;"> 3.07 </td>
-   <td style="text-align:right;"> 3.730 </td>
-   <td style="text-align:right;"> 17.60 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Merc 450SLC </td>
-   <td style="text-align:right;"> 15.2 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 275.8 </td>
-   <td style="text-align:right;"> 180 </td>
-   <td style="text-align:right;"> 3.07 </td>
-   <td style="text-align:right;"> 3.780 </td>
-   <td style="text-align:right;"> 18.00 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 15.2 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 275.8 </td>
-   <td style="text-align:right;"> 180 </td>
-   <td style="text-align:right;"> 3.07 </td>
-   <td style="text-align:right;"> 3.780 </td>
-   <td style="text-align:right;"> 18.00 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Cadillac Fleetwood </td>
-   <td style="text-align:right;"> 10.4 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 472.0 </td>
-   <td style="text-align:right;"> 205 </td>
-   <td style="text-align:right;"> 2.93 </td>
-   <td style="text-align:right;"> 5.250 </td>
-   <td style="text-align:right;"> 17.98 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 10.4 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 472.0 </td>
-   <td style="text-align:right;"> 205 </td>
-   <td style="text-align:right;"> 2.93 </td>
-   <td style="text-align:right;"> 5.250 </td>
-   <td style="text-align:right;"> 17.98 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Lincoln Continental </td>
-   <td style="text-align:right;"> 10.4 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 460.0 </td>
-   <td style="text-align:right;"> 215 </td>
-   <td style="text-align:right;"> 3.00 </td>
-   <td style="text-align:right;"> 5.424 </td>
-   <td style="text-align:right;"> 17.82 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 10.4 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 460.0 </td>
-   <td style="text-align:right;"> 215 </td>
-   <td style="text-align:right;"> 3.00 </td>
-   <td style="text-align:right;"> 5.424 </td>
-   <td style="text-align:right;"> 17.82 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Chrysler Imperial </td>
-   <td style="text-align:right;"> 14.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 440.0 </td>
-   <td style="text-align:right;"> 230 </td>
-   <td style="text-align:right;"> 3.23 </td>
-   <td style="text-align:right;"> 5.345 </td>
-   <td style="text-align:right;"> 17.42 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 14.7 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 440.0 </td>
-   <td style="text-align:right;"> 230 </td>
-   <td style="text-align:right;"> 3.23 </td>
-   <td style="text-align:right;"> 5.345 </td>
-   <td style="text-align:right;"> 17.42 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Fiat 128 </td>
-   <td style="text-align:right;"> 32.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 78.7 </td>
-   <td style="text-align:right;"> 66 </td>
-   <td style="text-align:right;"> 4.08 </td>
-   <td style="text-align:right;"> 2.200 </td>
-   <td style="text-align:right;"> 19.47 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 32.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 78.7 </td>
-   <td style="text-align:right;"> 66 </td>
-   <td style="text-align:right;"> 4.08 </td>
-   <td style="text-align:right;"> 2.200 </td>
-   <td style="text-align:right;"> 19.47 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Honda Civic </td>
-   <td style="text-align:right;"> 30.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 75.7 </td>
-   <td style="text-align:right;"> 52 </td>
-   <td style="text-align:right;"> 4.93 </td>
-   <td style="text-align:right;"> 1.615 </td>
-   <td style="text-align:right;"> 18.52 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 30.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 75.7 </td>
-   <td style="text-align:right;"> 52 </td>
-   <td style="text-align:right;"> 4.93 </td>
-   <td style="text-align:right;"> 1.615 </td>
-   <td style="text-align:right;"> 18.52 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Toyota Corolla </td>
-   <td style="text-align:right;"> 33.9 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 71.1 </td>
-   <td style="text-align:right;"> 65 </td>
-   <td style="text-align:right;"> 4.22 </td>
-   <td style="text-align:right;"> 1.835 </td>
-   <td style="text-align:right;"> 19.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 33.9 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 71.1 </td>
-   <td style="text-align:right;"> 65 </td>
-   <td style="text-align:right;"> 4.22 </td>
-   <td style="text-align:right;"> 1.835 </td>
-   <td style="text-align:right;"> 19.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Toyota Corona </td>
-   <td style="text-align:right;"> 21.5 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 120.1 </td>
-   <td style="text-align:right;"> 97 </td>
-   <td style="text-align:right;"> 3.70 </td>
-   <td style="text-align:right;"> 2.465 </td>
-   <td style="text-align:right;"> 20.01 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 21.5 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 120.1 </td>
-   <td style="text-align:right;"> 97 </td>
-   <td style="text-align:right;"> 3.70 </td>
-   <td style="text-align:right;"> 2.465 </td>
-   <td style="text-align:right;"> 20.01 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Dodge Challenger </td>
-   <td style="text-align:right;"> 15.5 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 318.0 </td>
-   <td style="text-align:right;"> 150 </td>
-   <td style="text-align:right;"> 2.76 </td>
-   <td style="text-align:right;"> 3.520 </td>
-   <td style="text-align:right;"> 16.87 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 15.5 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 318.0 </td>
-   <td style="text-align:right;"> 150 </td>
-   <td style="text-align:right;"> 2.76 </td>
-   <td style="text-align:right;"> 3.520 </td>
-   <td style="text-align:right;"> 16.87 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> AMC Javelin </td>
-   <td style="text-align:right;"> 15.2 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 304.0 </td>
-   <td style="text-align:right;"> 150 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.435 </td>
-   <td style="text-align:right;"> 17.30 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 15.2 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 304.0 </td>
-   <td style="text-align:right;"> 150 </td>
-   <td style="text-align:right;"> 3.15 </td>
-   <td style="text-align:right;"> 3.435 </td>
-   <td style="text-align:right;"> 17.30 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Camaro Z28 </td>
-   <td style="text-align:right;"> 13.3 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 350.0 </td>
-   <td style="text-align:right;"> 245 </td>
-   <td style="text-align:right;"> 3.73 </td>
-   <td style="text-align:right;"> 3.840 </td>
-   <td style="text-align:right;"> 15.41 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 13.3 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 350.0 </td>
-   <td style="text-align:right;"> 245 </td>
-   <td style="text-align:right;"> 3.73 </td>
-   <td style="text-align:right;"> 3.840 </td>
-   <td style="text-align:right;"> 15.41 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Pontiac Firebird </td>
-   <td style="text-align:right;"> 19.2 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 400.0 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.845 </td>
-   <td style="text-align:right;"> 17.05 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 19.2 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 400.0 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.08 </td>
-   <td style="text-align:right;"> 3.845 </td>
-   <td style="text-align:right;"> 17.05 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Fiat X1-9 </td>
-   <td style="text-align:right;"> 27.3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 79.0 </td>
-   <td style="text-align:right;"> 66 </td>
-   <td style="text-align:right;"> 4.08 </td>
-   <td style="text-align:right;"> 1.935 </td>
-   <td style="text-align:right;"> 18.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 27.3 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 79.0 </td>
-   <td style="text-align:right;"> 66 </td>
-   <td style="text-align:right;"> 4.08 </td>
-   <td style="text-align:right;"> 1.935 </td>
-   <td style="text-align:right;"> 18.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Porsche 914-2 </td>
-   <td style="text-align:right;"> 26.0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 120.3 </td>
-   <td style="text-align:right;"> 91 </td>
-   <td style="text-align:right;"> 4.43 </td>
-   <td style="text-align:right;"> 2.140 </td>
-   <td style="text-align:right;"> 16.70 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 26.0 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 120.3 </td>
-   <td style="text-align:right;"> 91 </td>
-   <td style="text-align:right;"> 4.43 </td>
-   <td style="text-align:right;"> 2.140 </td>
-   <td style="text-align:right;"> 16.70 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Lotus Europa </td>
-   <td style="text-align:right;"> 30.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 95.1 </td>
-   <td style="text-align:right;"> 113 </td>
-   <td style="text-align:right;"> 3.77 </td>
-   <td style="text-align:right;"> 1.513 </td>
-   <td style="text-align:right;"> 16.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 30.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 95.1 </td>
-   <td style="text-align:right;"> 113 </td>
-   <td style="text-align:right;"> 3.77 </td>
-   <td style="text-align:right;"> 1.513 </td>
-   <td style="text-align:right;"> 16.90 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Ford Pantera L </td>
-   <td style="text-align:right;"> 15.8 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 351.0 </td>
-   <td style="text-align:right;"> 264 </td>
-   <td style="text-align:right;"> 4.22 </td>
-   <td style="text-align:right;"> 3.170 </td>
-   <td style="text-align:right;"> 14.50 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 15.8 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 351.0 </td>
-   <td style="text-align:right;"> 264 </td>
-   <td style="text-align:right;"> 4.22 </td>
-   <td style="text-align:right;"> 3.170 </td>
-   <td style="text-align:right;"> 14.50 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Ferrari Dino </td>
-   <td style="text-align:right;"> 19.7 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 145.0 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.62 </td>
-   <td style="text-align:right;"> 2.770 </td>
-   <td style="text-align:right;"> 15.50 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 19.7 </td>
-   <td style="text-align:right;"> 6 </td>
-   <td style="text-align:right;"> 145.0 </td>
-   <td style="text-align:right;"> 175 </td>
-   <td style="text-align:right;"> 3.62 </td>
-   <td style="text-align:right;"> 2.770 </td>
-   <td style="text-align:right;"> 15.50 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 6 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Maserati Bora </td>
-   <td style="text-align:right;"> 15.0 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 301.0 </td>
-   <td style="text-align:right;"> 335 </td>
-   <td style="text-align:right;"> 3.54 </td>
-   <td style="text-align:right;"> 3.570 </td>
-   <td style="text-align:right;"> 14.60 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 15.0 </td>
-   <td style="text-align:right;"> 8 </td>
-   <td style="text-align:right;"> 301.0 </td>
-   <td style="text-align:right;"> 335 </td>
-   <td style="text-align:right;"> 3.54 </td>
-   <td style="text-align:right;"> 3.570 </td>
-   <td style="text-align:right;"> 14.60 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 8 </td>
-  </tr>
-<tr>
-<td style="text-align:left;"> Volvo 142E </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 121.0 </td>
-   <td style="text-align:right;"> 109 </td>
-   <td style="text-align:right;"> 4.11 </td>
-   <td style="text-align:right;"> 2.780 </td>
-   <td style="text-align:right;"> 18.60 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 21.4 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 121.0 </td>
-   <td style="text-align:right;"> 109 </td>
-   <td style="text-align:right;"> 4.11 </td>
-   <td style="text-align:right;"> 2.780 </td>
-   <td style="text-align:right;"> 18.60 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-</tbody>
-</table></div>
-
-<span style="color: rgba(68, 1, 84, 1);font-size: 5px;" >You</span> <span style="color: rgba(71, 13, 96, 1);font-size: 6px;" >can</span> <span style="color: rgba(72, 24, 106, 1);font-size: 6px;" >even</span> <span style="color: rgba(72, 34, 116, 1);font-size: 7px;" >try</span> <span style="color: rgba(71, 45, 122, 1);font-size: 7px;" >to</span> <span style="color: rgba(69, 54, 129, 1);font-size: 8px;" >make</span> <span style="color: rgba(66, 64, 134, 1);font-size: 8px;" >some</span> <span style="color: rgba(62, 73, 137, 1);font-size: 9px;" >crazy</span> <span style="color: rgba(59, 81, 139, 1);font-size: 9px;" >things</span> <span style="color: rgba(55, 90, 140, 1);font-size: 10px;" >like</span> <span style="color: rgba(51, 98, 141, 1);font-size: 10px;" >this</span> <span style="color: rgba(48, 106, 142, 1);font-size: 11px;" >paragraph.</span> <span style="color: rgba(44, 113, 142, 1);font-size: 11px;" >It</span> <span style="color: rgba(41, 121, 142, 1);font-size: 12px;" >may</span> <span style="color: rgba(38, 129, 142, 1);font-size: 12px;" >seem</span> <span style="color: rgba(35, 136, 142, 1);font-size: 13px;" >like</span> <span style="color: rgba(33, 144, 141, 1);font-size: 13px;" >a</span> <span style="color: rgba(31, 150, 139, 1);font-size: 14px;" >useless</span> <span style="color: rgba(31, 158, 137, 1);font-size: 14px;" >feature</span> <span style="color: rgba(33, 165, 133, 1);font-size: 15px;" >right</span> <span style="color: rgba(38, 173, 129, 1);font-size: 15px;" >now</span> <span style="color: rgba(48, 180, 124, 1);font-size: 16px;" >but</span> <span style="color: rgba(59, 187, 117, 1);font-size: 16px;" >it's</span> <span style="color: rgba(74, 193, 109, 1);font-size: 17px;" >so</span> <span style="color: rgba(90, 200, 100, 1);font-size: 17px;" >cool</span> <span style="color: rgba(108, 205, 90, 1);font-size: 18px;" >and</span> <span style="color: rgba(127, 211, 78, 1);font-size: 18px;" >nobody</span> <span style="color: rgba(145, 215, 66, 1);font-size: 19px;" >can</span> <span style="color: rgba(166, 219, 53, 1);font-size: 19px;" >resist.</span> <span style="color: rgba(187, 223, 39, 1);font-size: 20px;" >;)</span>
 
 # Create a new data.frame with columns rearranged with the CLEAN data
 
@@ -4289,3 +1499,260 @@ procrastinateClean <- select(procrastinate, RowID,
 # write.csv(procrastinateClean, file = "Test.csv")
 # write.csv(HDIMerged, file = "merged.csv", row.names=FALSE )
 ```
+
+
+
+
+```r
+# Extra code will clean out later before submission
+# Top15ProcrastinatorsAIP <- HDIMerged %>%
+#                             filter(Country!="*Missing*") %>%
+#                             select(Country, AIPMean, HDICategory) %>%
+#                             aggregate(AIPMean ~ Country, .,mean) %>%
+#                             arrange(desc(AIPMean)) %>%
+#                             slice(1:15)
+# 
+# # Round the aggregated mean to 2 decimal places
+# Top15ProcrastinatorsAIP$AIPMean <- round(Top15ProcrastinatorsAIP$AIPMean, digits=2)
+# 
+# 
+# Top15ProcrastinatorsByCoountry <- sqldf("select Country, 
+#                                          HDICategory, 
+#                                          round(avg(DPMean),2) as DPMean,
+#                                          round(avg(AIPMean),2) as AIPMean
+#                                          from HDIMerged
+#                                          Where Country<>'*Missing*'
+#                                          Group by Country, HDICategory
+#                                          Order by AIPMean desc") %>%
+#                                          slice(1:15)
+#   
+
+
+
+
+# display.brewer.all()
+# kable(Top15Procrastinators, "html") %>%
+# kable_styling("striped", full_width = F, position = "left" ) %>%
+# column_spec(2, background = "mistyrose") 
+# row_spec(3, bold = T, color = "white", background = "#D7261E")
+
+# # Using SQL
+# Top15ProcrastinatorsSQL <- sqldf("select Country, HDICategory, round(sum(DPMean)/count(DPMean),2) as DPMean
+#                                   from HDIMerged
+#                                   Where Country<>'*Missing*'
+#                                   Group by Country, HDI
+#                                   Order by DPMean desc") %>%
+#                                   slice(1:15)
+
+
+# Using the lm function run a simple linear regression
+#data.lm <- lm(Income ~ Age, data=HDIMerged)
+
+#Print the result set
+#data.lm
+
+#Print the summary for the result set
+#summary(data.lm)
+
+#95% Confidence Intervals
+#confint.lm(data.lm)
+
+# Scatter plot for data *******************************************
+# plot(x = HDIMerged$Age, 
+#      y = log(HDIMerged$Income),
+#      #xlim = c(3.25,10), 
+#      #ylim = c(.180,.525) ,
+#      xlab = "Age", 
+#      ylab = "Income", 
+#      main = "Age vs Income"
+#      )
+# 
+# # linear regression analysis
+# mylm <- lm(log(Income) ~ Age, data=HDIMerged)
+# 
+# abline (mylm, col = "red")
+
+# Add the regression line
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point()+
+#   geom_smooth(method=lm)
+# # Remove the confidence interval
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point()+
+#   geom_smooth(method=lm, se=FALSE)
+# # Loess method
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point()+
+#   geom_smooth()
+# 
+# # Change the point colors and shapes
+# # Change the line type and color
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point(shape=18, color="blue")+
+#   geom_smooth(method=lm, se=FALSE, linetype="dashed",
+#              color="darkred")
+# # Change the confidence interval fill color
+# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
+#   geom_point(shape=18, color="blue")+
+#   geom_smooth(method=lm,  linetype="dashed",
+#              color="darkred", fill="blue")
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = c("striped", "hover"))
+# 
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = c("striped", "hover",
+# "condensed"))
+# 
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = c("striped", "hover",
+# "condensed", "responsive"))
+# 
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = "striped", full_width= F)
+
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = "striped", full_width
+# = F, position = "left")
+
+# kable(GenderFreq, "html") %>%
+# kable_styling(bootstrap_options = "striped", full_width
+# = F, position = "float_left")
+
+# kable(WrkStatusFreq, format = "html") %>%
+# kable_styling("striped", full_width = F) %>%
+# row_spec(0, angle = 0)
+```
+
+
+
+
+
+```r
+#  dt <- mtcars[1:5, 1:6]
+#  kable(dt, "html")
+# 
+# dt %>%
+# kable("html") %>%
+# kable_styling()
+# 
+# kable(dt, "html") %>%
+# kable_styling(bootstrap_options = "striped", font_size =
+# 7)
+# 
+# text_tbl <- data.frame(
+# Items = c("Item 1", "Item 2", "Item 3"),
+# Features = c(
+# "Lorem ipsum dolor sit amet, consectetur adipiscing el
+# it. Proin vehicula tempor ex. Morbi malesuada sagittis tur
+# pis, at venenatis nisl luctus a. ",
+# "In eu urna at magna luctus rhoncus quis in nisl. Fusc
+# e in velit varius, posuere risus et, cursus augue. Duis el
+# eifend aliquam ante, a aliquet ex tincidunt in. ",
+# "Vivamus venenatis egestas eros ut tempus. Vivamus id
+# est nisi. Aliquam molestie erat et sollicitudin venenatis.
+# In ac lacus at velit scelerisque mattis. "
+# )
+# )
+# kable(text_tbl, "html") %>%
+# kable_styling(full_width = F) %>%
+# column_spec(1, bold = T, border_right = T) %>%
+# column_spec(2, width = "30em", background = "yellow")
+# 
+# 
+# 
+# 
+# 
+# 
+# mtcars[1:10, 1:2] %>%
+# mutate(
+# car = row.names(.),
+# # You don't need format = "html" if you have ever defined options(knitr.table.format)
+# 
+# mpg = cell_spec(mpg, "html", color = ifelse(mpg > 20,
+# "red", "blue")),
+# cyl = cell_spec(cyl, "html", color = "white", align =
+# "c", angle = 45,
+# background = factor(cyl, c(4, 6, 8),
+# c("#666666", "#999
+# 999", "#BBBBBB")))
+# ) %>%
+# select(car, mpg, cyl) %>%
+# kable("html", escape = F) %>%
+# kable_styling("striped", full_width = F)
+# 
+# 
+# 
+# iris[1:10, ] %>%
+# mutate_if(is.numeric, function(x) {
+# cell_spec(x, "html", bold = T, color = spec_color(x, end = 0.9),
+# font_size = spec_font_size(x))
+# }) %>%
+# mutate(Species = cell_spec(
+# Species, "html", color = "white", bold = T,
+# background = spec_color(1:10, end = 0.9, option = "A",
+# direction = -1)
+# )) %>%
+# kable("html", escape = F, align = "c") %>%
+# kable_styling("striped", full_width = F)
+# 
+# 
+# 
+# sometext <- strsplit(paste0(
+# "You can even try to make some crazy things like this paragraph. ",
+# "It may seem like a useless feature right now but it's so cool ",
+# "and nobody can resist. ;)"
+# ), " ")[[1]]
+# text_formatted <- paste(
+# text_spec(sometext, "html", color = spec_color(1:length(
+# sometext), end = 0.9),
+# font_size = spec_font_size(1:length(sometext),
+# begin = 5, end = 20)),
+# collapse = " ")
+# 
+# #To display the text, type `r text_formatted` outside of the chunk
+# 
+# popover_dt <- data.frame(
+# position = c("top", "bottom", "right", "left"),
+# stringsAsFactors = FALSE
+# )
+# popover_dt$`Hover over these items` <- cell_spec(
+# paste("Message on", popover_dt$position), # Cell texts
+# popover = spec_popover(
+# content = popover_dt$position,
+# title = NULL, # title will add a Title Panel on top
+# position = popover_dt$position
+# ))
+# kable(popover_dt, "html", escape = FALSE) %>%
+# kable_styling("striped", full_width = FALSE)
+# 
+# 
+# popover_dt <- data.frame(
+# position = c("top", "bottom", "right", "left"),
+# stringsAsFactors = FALSE
+# )
+# popover_dt$`Hover over these items` <- cell_spec(
+# paste("Message on", popover_dt$position), # Cell texts
+# popover = spec_popover(
+# content = popover_dt$position,
+# title = NULL, # title will add a Title Panel on top
+# position = popover_dt$position
+# ))
+# kable(popover_dt, "html", escape = FALSE) %>%
+# kable_styling("striped", full_width = FALSE)
+# 
+# kable(dt, "html") %>%
+# kable_styling("striped") %>%
+# add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2, "Group 3" = 2))
+# 
+# kable(dt, "html") %>%
+# kable_styling(c("striped", "bordered")) %>%
+# add_header_above(c(" ", "Group 1" = 2, "Group 2" = 2, "Group 3" = 2)) %>%
+# add_header_above(c(" ", "Group 4" = 4, "Group 5" = 2)) %>%
+# add_header_above(c(" ", "Group 6" = 6))
+# 
+# kable(cbind(mtcars, mtcars), "html") %>%
+# kable_styling() %>%
+# scroll_box(width = "900px", height = "600px")
+```
+
+
