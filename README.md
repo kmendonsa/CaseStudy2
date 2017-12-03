@@ -60,13 +60,13 @@ Do you consider yourself a procrastinator?: a binary response
 
 Do others consider you a procrastinator?: a binary response
 
-Computed column: DPMean
+Computed column: DPMean - mean of the DP survey variable
 
-Computed column: AIPMean
+Computed column: AIPMean - mean of the AIP survey variable
 
-Computed column: GPMean
+Computed column: GPMean - mean of the GP survey variable
 
-Computed column: SWLSMean
+Computed column: SWLSMean - mean of the SWLS survey variable
 
 
 There were several survey questionnaire types that are not defined in the data set: DP, AIP, GP, and SWLS. We will explain the concepts of these questions so that it may be properly interpreted. 
