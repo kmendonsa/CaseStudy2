@@ -1,0 +1,20 @@
+
+# Create a data frame with age, income, and gender variables
+age_income <- subset(HDIMerged, select = c(Age, Income))
+
+# Log transform income to see whether it changes the relationship, it does not
+age_income[, 2] <- log(age_income[2],2)
+
+# Plot a scatter plot for age and income without log transform
+qplot(Age, Income, colour = Gender, data = age_income)
+
+# Plot a scatter plot for age and income with log transform
+qplot(Age, Income, colour = Gender, data = age_income)
+
+# Determine the correaltion between variables using Pearson's correlation coefficent 
+## TO DO: Log transform income and then re-plot 
+age_income_cor <- cor.test(age_income$Age, age_income$Income, 
+                method = "pearson")
+
+# Pearsons correlation coefficient = 0.3749714, 95 percent confidence interval:[0.3469706 0.4023044]
+print(age_income_cor)
