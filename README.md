@@ -96,5 +96,18 @@ SWLS is typically a concise 5-item insturment used to underantd and measure glob
 
 Source: https://internal.psychology.illinois.edu/~ediener/SWLS.html
 
+# WebScrape.CSV
 
+This data was scraped from Wikipedia and contains Human Development Attibutes for 189 countries. The variables are described below: 
 
+HDICategory: Categoriztion of the coutnries into 4 variables of HDI (Very High, High, Medium, Low)
+
+Rank2016_15: Individual countries rank for the calendar year '15-'16
+
+RankChange: How many positions the country changed in overall ranking 
+
+Country: Countries involved in the study 
+
+HDI2016_15: Human Development Index (HDI) score for the calendar year '15-'16
+
+HDIChngYoY: Meaure (%) as to the change in HDI over the last year
