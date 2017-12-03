@@ -4,6 +4,17 @@
 
 Procrastination - A global view
 
+# Repo Organization 
+
+The Git Hub was logically organized to make review, commits, and accessibility easy for all contributors and clients. The following folders can be found int he root directory: 
+
+Data - This repo contains all the data related to the project. This data will be described in detail in later sections but the two key files are the procrastination.csv file and the data scraped from wikipedia on Human Development Index.
+Other - This repo contains working files of the entire project. Individual sections of the Case Study can be found here. 
+Paper - The objectives of the case study are stored in this repo. 
+Source - 
+File: CaseStudy2.md
+File: ReadMe.md
+
 Procastination.csv
 
 Survey questionnaire types: DP, AIP, GP, and SWLS
