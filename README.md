@@ -16,7 +16,7 @@ Other - This repo contains working files of the entire project. Individual secti
 
 Paper - The objectives of the case study are stored in this repo. 
 
-Source - 
+Source - Thsi repo contains the final Rmarkdown and HTML outputs for the case study.
 
 # Procrastination Data Set 
 
