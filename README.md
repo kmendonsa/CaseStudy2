@@ -20,24 +20,50 @@ Source -
 File is labeled Procastination.csv and can be found in the Data repo. An explanation of the variables is provided below:
 
 Age: The participant’s age in years.
+
 Gender: The gender the participant identifies as (Male or Female)
+
 Kids: Binary, whether they have kids or not.
+
 Edu: Education level
+
 Work Status: What kind of job are they working?
+
 Annual Income: All converted to dollars.
+
 Current Occupation: A write-in for occupation.
+
 How long have you held this position?: Years: Number of years in this job.
+
 How long have you held this position?: Months: Number of months in this job.
+
 Community: Size of community
+
 Country of Residence: The country where the person holds citizenship.
+
 Marital Status: Single, Married, Divorced, Separated, etc.
+
 Number of sons/Number of daughters: integer number of children.
+
 All variables starting DP – the Decisional Procrastination Scale (Mann, 1982)
+
 All variables starting AIP – Adult Inventory of Procrastination (McCown & Johnson, 1989)
+
 All variables starting GP – the General Procrastination scale (Lay, 1986)
+
 All variables starting SWLS – the Satisfaction with Life Scale (Diener et al., 1985)
+
 Do you consider yourself a procrastinator?: a binary response
+
 Do others consider you a procrastinator?: a binary response
+
+Computed column: DPMean
+
+Computed column: AIPMean
+
+Computed column: GPMean
+
+Computed column: SWLSMean
 
 
 There were several survey questionnaire types that are not defined in the data set: DP, AIP, GP, and SWLS. We will explain the concepts of these questions so that it may be properly interpreted. 
