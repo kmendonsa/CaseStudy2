@@ -22,7 +22,8 @@ All these repositories are contained within the parent repo, CaseStudy2
 Data - This repo contains all the data related to the project. This data will be described in detail in later sections but the two key files are the procrastination.csv file and the data scraped from wikipedia on the Human Development Index. The files contained in this repo are:
 - Copy of Procrastination.xlsx: Copied file of the raw procrastination survey
 - DataDictionary.csv: naming convention overrides of all the survey data, character length, data format, and number of missing variables
-- HDIData.csv: File containing the HDI category and HDi score per country
+- HDI_Data.csv: File containing the HDI category and HDI score per country
+- HDI_Merged_Data.csv: File containing sampled procrastination and HDI data
 - OccupationsMapping.CSV: Naming convention transformation of all the occupation types 
 - WebScrape.CSV: HDI data scraped from Wikipedia 
 
