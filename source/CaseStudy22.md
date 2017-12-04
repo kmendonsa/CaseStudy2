@@ -1,18 +1,31 @@
-# PROCRASTINATION - A global analysis
+# PROCRASTINATION - A GLOBAL ANALYSIS
 Kevin Mendonsa & Ruhaab Markas  
 November 26, 2017  
 
 
 
-## Introduction
+### INTRODUCTION
 
-You have finally finished data collection; it involved various measures of procrastination and the qualities these folks have. You plan on pitching a proposal to a company of your choosing. The details of the company, the objectives of the repo, and some of the questions are up to you; however, you should make sure that you answer at minimum the questions posed in the Tasks section. Though you get some leeway as data scientists, there are some baseline questions that the company wants to know about the data they funded. This is the resulting data set from the study, tabulated by Qualtrics. It is not entirely well-cleaned and will need some manipulation to make it useful.
+This analysis takes a closer look into the behaviors of procrastination globally, and its correlation if any to the Human Development Index (HDI) and the variables that may contribute to these behaviors. Procrastination is an intentional delay of a course of action despite expecting to be worse. The main purpose of this study is to analyze surveys that measure procrastination. The various surveys used for this analysis are based on the below scales and further information is provided later in this code book.
+
+##### - DECISIONAL PROCRASTINATION SCALE (MANN, 1982)
+
+##### - ADULT INVENTORY OF PROCRASTINATION (MCCOWN & JOHNSON, 1989)
+
+##### - GENERAL PROCRASTINATION SCALE (LAY, 1986)
+
+##### - SATISFACTION WITH LIFE SCALE (DIENER ET AL., 1985)
 
 
-#### R - Environment
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
+
+R - ENVIRONMENT
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
 
 
 ```r
+# R-Environment
 sessionInfo()
 ```
 
@@ -39,8 +52,11 @@ sessionInfo()
 ##  [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.17      stringr_1.2.0  
 ## [13] digest_0.6.12   evaluate_0.10.1
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
-### Libraries required
+LIBRARIES REQUIRED
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 
 ```
@@ -74,6 +90,21 @@ sessionInfo()
 
 ```
 ## Loading required package: xml2
+```
+
+```
+## 
+## Attaching package: 'compare'
+```
+
+```
+## The following object is masked from 'package:base':
+## 
+##     isTRUE
+```
+
+```
+## Warning: package 'lucr' was built under R version 3.4.3
 ```
 
 ```
@@ -114,17 +145,19 @@ sessionInfo()
 ```
 
 ```
-## arrange():   dplyr, plyr
-## compact():   purrr, plyr
-## count():     dplyr, plyr
-## failwith():  dplyr, plyr
-## filter():    dplyr, stats
-## id():        dplyr, plyr
-## lag():       dplyr, stats
-## mutate():    dplyr, plyr
-## rename():    dplyr, plyr
-## summarise(): dplyr, plyr
-## summarize(): dplyr, plyr
+## arrange():    dplyr, plyr
+## col_factor(): readr, scales
+## compact():    purrr, plyr
+## count():      dplyr, plyr
+## discard():    purrr, scales
+## failwith():   dplyr, plyr
+## filter():     dplyr, stats
+## id():         dplyr, plyr
+## lag():        dplyr, stats
+## mutate():     dplyr, plyr
+## rename():     dplyr, plyr
+## summarise():  dplyr, plyr
+## summarize():  dplyr, plyr
 ```
 
 ```
@@ -138,8 +171,16 @@ sessionInfo()
 ##     digits
 ```
 
-# Set the working directory for the Data
+```
+## The following objects are masked from 'package:scales':
+## 
+##     comma, percent, scientific
+```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
+SET THE WORKING DIRECTORY FOR THE DATA.
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
 
 ```r
 # Set the working directory for the Data
@@ -148,11 +189,16 @@ sessionInfo()
 # set working directory
   setwd(BaseDir)
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
-## Load the data from the csv files and from the web
+LOAD THE DATA FROM THE CSV FILES AND SCRAPE HDI DATA FROM THE WEB.
 
+https://en.wikipedia.org/wiki/List_of_countries_by_Human_Development_Index
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
+# Load the data from the csv files and scrape HDI data from the web
 procrastinate_raw <- read.csv("Procrastination.csv", 
                                   na.strings = "NA", 
                                   blank.lines.skip = TRUE,
@@ -207,21 +253,21 @@ procrastinate_raw <- read.csv("Procrastination.csv",
                                Where VHigh_HDI_df.X3 not in ('Rank', 'Country',
                                'Change in rank from previous year[1]')")
         
-        High_HDI_df <- sqldf("select 'Very High' as HDICategory,
+        High_HDI_df <- sqldf("select 'High' as HDICategory,
                               X3 as Country,
                               X4 as HDI
                               from High_HDI_df
                               Where High_HDI_df.X3 not in ('Rank', 'Country',
                               'Change in rank from previous year[1]')")
         
-        Med_HDI_df <- sqldf("select 'Very High' as HDICategory,
+        Med_HDI_df <- sqldf("select 'Medium' as HDICategory,
                               X3 as Country,
                               X4 as HDI
                               from Med_HDI_df
                               Where Med_HDI_df.X3 not in ('Rank', 'Country',
                               'Change in rank from previous year[1]')")
         
-        Low_HDI_df <- sqldf("select 'Very High' as HDICategory,
+        Low_HDI_df <- sqldf("select 'Low' as HDICategory,
                              X3 as Country,
                              X4 as HDI
                              from Low_HDI_df
@@ -234,30 +280,42 @@ procrastinate_raw <- read.csv("Procrastination.csv",
                            Med_HDI_df,
                            Low_HDI_df )
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
   
-# The datasets we used to analyze global procrastination consisted of 
-  the following observations and variables:
-  Procrastination data: 
-  Human Development Index data
-  
+OBSERVATIONS AND VARIABLES FOR EACH DATA FRAME
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**    
 
 ```r
- # dim(procrastinate_raw)
-   cbind(ROWS=NROW(procrastinate_raw), COLUMNS=NCOL(procrastinate_raw))
+ dim(procrastinate_raw)
 ```
 
 ```
-##      ROWS COLUMNS
-## [1,] 4264      61
+## [1] 4264   61
 ```
 
 ```r
- # dim(HDI_raw)
+ dim(HDI_raw)
 ```
 
-  
-# Prepare data for cleansing and transformation 
+```
+## [1] 189   3
+```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
+**THE DATA FRAMES FOR ANALYSIS HAVE THE FOLLOWING OBSERVATIONS AND VARIABLES.**
+
+|DATA FRAME       |OBSERVATIONS | VARIABLES |
+|:----------------|:-----------:|:---------:|
+|PROCRASTINATION  | **4264**    |**61**     |
+|HDI INDEX        | **189**     |**3**      |           
+
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
+
+PREPARE DATA FOR CLEANSING AND TRANSFORMATION TO CREATE A CLEAN DATA SET FOR ANALYSIS.
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 # Add a uniqueID to each row - we may need it later
@@ -267,9 +325,13 @@ procrastinate_raw <- read.csv("Procrastination.csv",
   procrastinate <- procrastinate_raw
   webscrape     <- HDI_raw
 ```
-  
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**   
 
-# Rename the variables
+RENAME THE VARIABLES TO BE EASILY READABLE, CONCISE AND A SHORTER LENGTH. 
+
+REMOVED ALL SPACES TO MAKE THEM MORE INTUITIVE.
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
 
 
 ```r
@@ -336,11 +398,14 @@ names(procrastinate) <- c("RowID",
                             "SelfProcrast",
                             "OthrProcrast")
 ```
-  
-# Convert character fields to a character datatype from factor
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
 
+CONVERT CHARACTER FIELDS TO A CHARACTER DATATYPE FROM FACTORS.
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
+# Convert character fields to a character datatype from factor
   procrastinate$Gender        <- as.character(procrastinate$Gender)
   procrastinate$Kids          <- as.character(procrastinate$Kids)
   procrastinate$Education     <- as.character(procrastinate$Education)
@@ -352,27 +417,38 @@ names(procrastinate) <- c("RowID",
   procrastinate$SelfProcrast  <- as.character(procrastinate$SelfProcrast)
   procrastinate$OthrProcrast  <- as.character(procrastinate$OthrProcrast)  
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**    
   
-  
-# Add new columns for the mean of each survey mean by individual - DPMean, AIPMean, GPMean, SWLSMean
+**ADD NEW COLUMNS FOR THE MEAN OF EACH SURVEY MEAN BY INDIVIDUAL:**
 
+- DPMean
+- AIPMean
+- GPMean 
+- SWLSMean
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
+# Calculate the means of the 4 individual surveys
   procrastinate <-  transform(procrastinate,  DPMean = rowMeans(procrastinate[,15:19], na.rm = TRUE)) %>% 
                                   transform( AIPMean = rowMeans(procrastinate[,20:34], na.rm = TRUE)) %>%
                                   transform(  GPMean = rowMeans(procrastinate[,35:54], na.rm = TRUE)) %>%
                                   transform(SWLSMean = rowMeans(procrastinate[,55:59], na.rm = TRUE)) 
   
-# Round all means to 2 digits to  
+# Round all means to 2 digits  
   procrastinate$DPMean   <- round(procrastinate$DPMean,   digits =2)
   procrastinate$AIPMean  <- round(procrastinate$AIPMean,  digits =2)
   procrastinate$GPMean   <- round(procrastinate$GPMean,   digits =2)
   procrastinate$SWLSMean <- round(procrastinate$SWLSMean, digits =2)
 ```
-  
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**    
                        
-# Remove whitepsace by trimming the right and left sides
+- REMOVE WHITESPACE BY TRIMMING THE RIGHT AND LEFT SIDES.
+- CLEAN UP THE OCCUPATIONS DATA.
+- NORMALIZE AND STANDARDIZE FOR CONSISTENCY AND EASE OF DATA ANALYSIS
+- OCCUPATIONMAPPING.CSV can be found in the "DATA" folder in the repo
 
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 # Trim whitespace on left and right of value  
@@ -739,12 +815,14 @@ c("0" = "*Missing*",
   "VP Scientific Affairs / pharmaceutical c"="Scientific Affairs - VP"
    ))
 ```
-  
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**    
 
-#  Rename values in the field "Edu" to meaningful names and load to a new column named "EducationAlt"
+RENAME VALUES IN THE FIELD "EDU" TO MEANINGFUL NAMES AND LOAD TO A NEW COLUMN NAMED "EDUCATIONALT"
 
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
+# Format and expand on the Education abbreviations to meaningful values
 ELSE <- TRUE
 procrastinate <- procrastinate %>%
                             mutate(EducationAlt = case_when(
@@ -753,7 +831,6 @@ procrastinate <- procrastinate %>%
                                                             .$Education == "dip"     ~ "Diploma",
                                                             .$Education == "grade"   ~ "Elementary School",
                                                             .$Education == "high"    ~ "High School",
-                                                            .$Education == "phd"     ~ "PhD",
                                                             .$Education == "lthigh"  ~ "Left High School",
                                                             .$Education == "ltuni"   ~ "Left University",
                                                             .$Education == "phd"     ~ "PhD",
@@ -761,10 +838,11 @@ procrastinate <- procrastinate %>%
                                                            )
                                     ) 
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
+CLEAN OTHER FIELDS AS APPROPRIATE.
 
-### Clean other fields
-
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 # Replace missing values in "Gender" with an explicit "*Missing*"
@@ -829,6 +907,11 @@ procrastinate$OthrProcrast <- plyr::revalue(procrastinate$OthrProcrast,
 ```
 
 ```r
+# format Income to dollar currency
+# HDIMerged$IncomeCurr <- to_currency( HDIMerged$Income, currency_symbol = "$", symbol_first = TRUE,
+#                                     group_size = 3, group_delim = ",", decimal_size = 0,
+#                                     decimal_delim = ".") 
+
 # Change to "Title" case
 procrastinate$Kids           <- str_to_title(procrastinate$Kids, locale = "en") # Replace blanks with "*Missing*"
 procrastinate$SelfProcrast   <- str_to_title(procrastinate$SelfProcrast, locale = "en") # Change to "Title" case
@@ -836,23 +919,11 @@ procrastinate$OthrProcrast   <- str_to_title(procrastinate$OthrProcrast, locale 
 procrastinate$OccupatnAlt    <- str_to_upper(procrastinate$OccupatnAlt, locale = "en") # Change to UPPER case
 procrastinate$WrkStatus      <- str_to_title(procrastinate$WrkStatus, locale = "en")
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
+MERGE THE WEBSCRAPE AND PROCRASTINATE DATA FRAMES ON COUNTRY DOING A LEFT JOIN ON WEBSCRAPE.
 
-### Merge the webscrape and procrastinate data frames on country doing a left join on webscrape
-
-### Javascript to add "hover" and scroll bars to table
-<script>
-$(document).ready(function(){
-$('[data-toggle="tooltip"]').tooltip();
-});
-</script>
-
-<script>
-$(document).ready(function(){
-$('[data-toggle="popover"]').popover();
-});
-</script>
-
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 # Let's trim all whitespace in the country field of the webscrape
@@ -870,23 +941,32 @@ HDIMerged <- merge(procrastinate, HDI_raw, by = "Country", all.x = TRUE)
 # Replace NA with explicit *Missing* in HDI category
 HDIMerged$HDICategory[is.na(HDIMerged$HDICategory)] <- "*Missing*"
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
-### PRELIMINARY DATA ANALYSIS
+**PRELIMINARY DATA ANALYSIS**
 
-1. For the purpose of this analysis we have eliminated all participants under 18 years of age.  This will permit a focus on primarily employment eligible individuals.  Furthermore, we have also excluded all participants 80 years and above for a similar purpose.The intention is not to skew our analysis in any way with bias from participants 18 and below and 80 and above.  
+*For the purpose of this analysis we have eliminated all participants under 18 years of age.  This will permit a focus on primarily employment eligible individuals.  Furthermore, we have also excluded all participants 80 years and above for a similar purpose.The intention is not to skew our analysis in any way with bias from participants 18 and below and 80 and above.*
 
-DESCRIPTIVE STATISTICS OF KEY FACTORS
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
-AGE - INCOME - HDI Descriptive statistics
+**DESCRIPTIVE STATISTICS OF KEY FACTORS**
 
+- AGE
+- INCOME 
+- HDI
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
+# create data frames for each of the 3 variables
 AGE    <- HDIMerged$Age
 INCOME <- HDIMerged$Income
 HDI    <- HDIMerged$HDI
 
+# Combine them inot a single data frame
 d <- data.frame(AGE,INCOME, HDI )
 
+# Generate the descriptive statistics
 summary(d)
 ```
 
@@ -900,9 +980,16 @@ summary(d)
 ##  Max.   :80.00   Max.   :250000   (Other): 428  
 ##  NA's   :71      NA's   :548      NA's   : 247
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
-SURVEY MEANS - DP, GP, AIP, SWLS
+**SURVEY MEANS**
 
+- DP
+- GP
+- AIP
+- SWLS
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 DP   <- HDIMerged$DPMean
@@ -924,9 +1011,11 @@ summary(d)
 ##  3rd Qu.:3.200   3rd Qu.:3.750   3rd Qu.:3.530   3rd Qu.:3.800  
 ##  Max.   :6.000   Max.   :5.000   Max.   :5.000   Max.   :5.000
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
+**HISTOGRAM: AIP MEAN**
 
-
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 # Exclude all observations where the participant is under 18 years of age and 80 and over
@@ -935,18 +1024,29 @@ HDIMerged <- filter(HDIMerged, Age > 18) %>%
                 filter(Age < 79 )
 
 # Histogram for AIPMean
-qplot(HDIMerged$AIPMean,
-      geom="histogram",
-      binwidth = .25,  
-      main = "Histogram of AIP Mean", 
-      xlab = "AIP Mean",  
-      fill=I("blue"), 
-      col=I("red"),
-      xlim=c(0,5.5),
-      alpha=I(.4))
+ggplot(data=HDIMerged, aes(x=HDIMerged$AIPMean)) + 
+  geom_histogram(binwidth = .25, 
+                 col="black", 
+                 fill="blue", 
+                 alpha = .2) + 
+  labs(title="Histogram of AIP Mean", x="AIP Mean", y="Count") + 
+  xlim(c(0,5)) + 
+  ylim(c(0,550)) +
+  theme(plot.title = element_text(hjust = 0.5, vjust=0.5))
 ```
 
-![](CaseStudy22_files/figure-html/histograms-1.png)<!-- -->
+<img src="CaseStudy22_files/figure-html/histograms_AIP-1.png" style="display: block; margin: auto;" />
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
+
+**THE DISTRIBUTION OF THE AIP MEAN OF THE SURVEYED PARTICIPANTS**
+
+- The distribution has some appearance of a bi-modal distribution but it fits a normal distribution well.
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
+
+**HISTOGRAM: GP MEAN**
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
 # Histogram for GPMean
@@ -955,25 +1055,29 @@ ggplot(data=HDIMerged, aes(x=HDIMerged$GPMean)) +
                  col="red", 
                  fill="green", 
                  alpha = .2) + 
-  labs(title="Histogram of GP Mean", x="GP Mean", y="Count") + 
+  labs(title="Histogram of GP MEAN", x="GP Mean", y="Count") + 
   xlim(c(0,5)) + 
   ylim(c(0,550)) +
   theme(plot.title = element_text(hjust = 0.5, vjust=0.5))
 ```
 
-![](CaseStudy22_files/figure-html/histograms-2.png)<!-- -->
+<img src="CaseStudy22_files/figure-html/histograms_GP-1.png" style="display: block; margin: auto;" />
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
-## The distribution of the AIP Mean and the GP Mean
-# The distribution for the AIP mean has some appearence of a bi-modal distribution but it does fit a normal distribution fairly well. The distribution for the for the GP mean has some left skew but still confirms to a normal distribution.
+**THE DISTRIBUTION OF THE GP MEAN OF THE SURVEYED PARTICIPANTS**
 
-
+- The distribution for the for the GP mean has some left skew but still conforms to a normal distribution.
+ 
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
-GenderFreq <- sqldf("select Gender, count(1) as Count
+# Gender Frequency
+GenderFreq <- sqldf("select Gender as 'GENDER', count(1) as 'COUNT'
                       from HDIMerged
                       Group by Gender
                       Order by 2 desc")
 
+# Table to display gender frequency
 kable(GenderFreq, "html") %>%
 kable_styling("striped", full_width = F, position = "left" ) %>%
 column_spec(2, bold = T) %>%
@@ -982,8 +1086,8 @@ row_spec(3, bold = T, color = "white", background = "#D7261E")
 
 <table class="table table-striped" style="width: auto !important; ">
 <thead><tr>
-<th style="text-align:left;"> Gender </th>
-   <th style="text-align:right;"> Count </th>
+<th style="text-align:left;"> GENDER </th>
+   <th style="text-align:right;"> COUNT </th>
   </tr></thead>
 <tbody>
 <tr>
@@ -1000,13 +1104,25 @@ row_spec(3, bold = T, color = "white", background = "#D7261E")
   </tr>
 </tbody>
 </table>
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
+
+**DEMOGRAPHICS OF POLLED RESPONDENTS: MEAN AGE ~ 37 yrs.**
+
+|DATA FRAME       |COUNT        | PERCENT |
+|:----------------|:-----------:|:-------:|
+|FEMALE           | **2295**    |**57%**  |
+|MALE             | **1708**    |**43%**  |  
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
 
 ```r
-WrkStatusFreq <- sqldf("select WrkStatus, count(1) as Count
+# WorkStatus frequency
+WrkStatusFreq <- sqldf("select WrkStatus as 'WORK STATUS', count(1) as 'COUNT'
                         from HDIMerged
                         Group by WrkStatus
                         Order by 2 desc")
 
+# Table to display work status frequency
 kable(WrkStatusFreq, "html") %>%
 kable_styling("striped", full_width = F, position = "left" ) %>%
 column_spec(2, bold = T) %>%
@@ -1015,8 +1131,8 @@ row_spec(6, bold = T, color = "white", background = "#D7261E")
 
 <table class="table table-striped" style="width: auto !important; ">
 <thead><tr>
-<th style="text-align:left;"> WrkStatus </th>
-   <th style="text-align:right;"> Count </th>
+<th style="text-align:left;"> WORK STATUS </th>
+   <th style="text-align:right;"> COUNT </th>
   </tr></thead>
 <tbody>
 <tr>
@@ -1045,25 +1161,50 @@ row_spec(6, bold = T, color = "white", background = "#D7261E")
   </tr>
 </tbody>
 </table>
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+**THE FREQUENCY DISTRIBUTION OF THE WORK STATUS OF THE PARTICIPANTS IS:**
+
+|WORK TYPE  |COUNT     | PERCENT  |
+|:----------|:--------:|:--------:|
+|FULL-TIME  |**2259**  |**56**    |
+|STUDENT    |**837**   |**21%**   |  
+|PART-TIME  |**463**   |**12%**   |
+|UNEMPLOYED |**257**   |**6%**    |
+|RETIRED    |**151**   |**4%**    |  
+|*MISSING*  |**42**    |**1%**    |
+
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
 ```r
+# data set of participants grouped by country
 Country <- sqldf ("select Country, Count(1) as Participants
                     from HDIMerged
                     Where Country<>'*Missing*'
                     Group by Country
                     Order by 2 desc")
 
+# formatting the dataset to arrange the data in 6 columns
 Country1 <- Country[1:30,]
 Country2 <- Country[31:60,]
 Country3 <- Country[61:90,]
 CountryCount <- cbind(Country1, Country2,Country3)
+```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
+- *US is 72% of the sample population surveyed. The Top 8 countries account for ~ 90% of survey respondents.*
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+```r
+# A table of the participants by country
 kable(CountryCount, "html") %>%
-kable_styling("striped", full_width = F, position = "left" ) %>%
+kable_styling("striped", full_width = F, position = "center" ) %>%
 column_spec(c(2,4,6), bold = T, background = "lightblue") 
 ```
 
-<table class="table table-striped" style="width: auto !important; ">
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead><tr>
 <th style="text-align:left;"> Country </th>
    <th style="text-align:right;"> Participants </th>
@@ -1317,14 +1458,30 @@ column_spec(c(2,4,6), bold = T, background = "lightblue")
 </table>
 
 ```r
-Matched <- sqldf ("select Count(1) as 'Yes'
+# Matches of how many people had others that agreed with their perceptions
+Matched <- sqldf ("select Count(1) as 'MATCHES'
                     from HDIMerged
                     Where SelfProcrast=OthrProcrast
-                    AND SelfProcrast='Yes'
                     ")
 
-#TOP 15 nations with average procrastination scores
-#5b
+Matched
+```
+
+```
+##   MATCHES
+## 1    2826
+```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+- THERE ARE **2826** PERSONS THAT MATCHED THEIR PERCEPTIONS TO OTHERS.  
+- THESE ARE PEOPLE THAT SAID THEY FELT THEY WERE OR WERE NOT PROCRASTINATORS AND OTHERS AGREED WITH THEIR ASSESSMENT.
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+```r
+#### Question 5 - Deeper Analysis ##################################
+
+# Create a bargraph of top 15 countries colored by HDI Category
 
 # Aggregate the average DP Mean by country
 DPMeanByCountry <- select(HDIMerged, Country, DPMean) %>%
@@ -1332,7 +1489,7 @@ DPMeanByCountry <- select(HDIMerged, Country, DPMean) %>%
                   aggregate(DPMean ~ Country, .,mean)
 
 # Distinct list of Country and HDI category
-HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory)) 
+HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory))
 
 # Merge the aggregate of DPMean and the distinct country and HDI category
 Top15ProcrastinatorsDP <- merge(DPMeanByCountry, HDICategoryByCountry, by = "Country", all.x = TRUE) %>%
@@ -1342,32 +1499,41 @@ Top15ProcrastinatorsDP <- merge(DPMeanByCountry, HDICategoryByCountry, by = "Cou
 # Round the aggregated mean to 2 decimal places
 Top15ProcrastinatorsDP$DPMean <- round(Top15ProcrastinatorsDP$DPMean, digits=2)
 
-# SQL code not required but used for validation
-Top15ProcrastinatorsDP <- sqldf("select Country, 
-                               HDICategory, 
-                               round(sum(DPMean)/count(DPMean),2) as DPMean
-                               from HDIMerged
-                               Where Country<>'*Missing*'
-                               Group by Country, HDICategory
-                               Order by DPMean desc") %>%
-                               slice(1:15)
-  
 # Bar graph using GGPLOT for Top 15 countries in descending order for DP mean
 ggplot(Top15ProcrastinatorsDP,aes(x=reorder(Country,-DPMean),y=DPMean, fill=HDICategory))+
   geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
   coord_cartesian(xlim = c(0,16), ylim = c(3, 4.25))+
-  xlab("Country") + 
-  ylab("DP Mean") + 
-  ggtitle("Country by Procrastination - DP Mean Score")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(axis.text.x = element_text(size=10, angle = 90, hjust = 1, vjust = 0.5),
-  axis.title=element_text(size=12),
-  plot.title = element_text(size=15, hjust = 0.5, vjust = 1)) +
-  scale_color_gradient()+
+  xlab("COUNTRY") + 
+  ylab("DP MEAN") + 
+  ggtitle("COUNTRY BY PROCRASTINATION - DP MEAN")+
+  theme(axis.text.x = element_text(size=15, angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.title=element_text(size=15),
+  plot.title = element_text(size=25, hjust = 0.5, vjust = 1)) +
   scale_fill_brewer(palette="Set1")
 ```
 
-![](CaseStudy22_files/figure-html/kable_formatting-1.png)<!-- -->
+<img src="CaseStudy22_files/figure-html/question5b_deep_analysis-1.png" style="display: block; margin: auto;" />
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**  
+
+**THE TOP 15 COUNTRIES WITH THE HIGHEST DP MEAN ARE:**
+- Puerto Rico
+- Panama
+- Qatar
+- Taiwan
+- Lithuania
+- Macao
+- Sri Lanka
+- Colombia
+- Ecuador
+- Bulgaria
+- Jamaica
+- Austria
+- Uruguay
+- Finland
+- Slovenia
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
 ```r
 #TOP 15 nations with average procrastination scores
@@ -1389,370 +1555,266 @@ Top15ProcrastinatorsAIP <- merge(AIPMeanByCountry, HDICategoryByCountry, by = "C
 # Round the aggregated mean to 2 decimal places
 Top15ProcrastinatorsAIP$AIPMean <- round(Top15ProcrastinatorsAIP$AIPMean, digits=2)
 
-# SQL code not required but used for validation
-Top15ProcrastinatorsAIP <- sqldf("select Country, 
-                               HDICategory, 
-                               round(sum(AIPMean)/count(AIPMean),2) as AIPMean
-                               from HDIMerged
-                               Where Country<>'*Missing*'
-                               Group by Country, HDICategory
-                               Order by AIPMean desc") %>%
-                               slice(1:15)
 
 # Bar graph using GGPLOT for Top 15 countries in descending order for AIP mean
 ggplot(Top15ProcrastinatorsAIP,aes(x=reorder(Country,-AIPMean),y=AIPMean, fill=HDICategory))+
   geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
   coord_cartesian(xlim = c(0,16), ylim = c(3, 4.75))+
-  xlab("Country") + 
-  ylab("AIP Mean") + 
-  ggtitle("Country by Procrastination - AIP Mean Score")+
+  xlab("COUNTRY") + 
+  ylab("AIP MEAN") + 
+  ggtitle("COUNTRY BY PROCRASTINATION - AIP MEAN")+
   theme(plot.title = element_text(hjust = 0.5)) +
-  theme(axis.text.x = element_text(size=10, angle = 90, hjust = 1, vjust = 0.5),
-  axis.title=element_text(size=12),
-  plot.title = element_text(size=15, hjust = 0.5, vjust = 1)) +
-  scale_color_gradient()+
+  theme(axis.text.x = element_text(size=15, angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.title=element_text(size=15),
+  plot.title = element_text(size=25, hjust = 0.5, vjust = 1)) +
   scale_fill_brewer(palette="Set1")
 ```
 
-![](CaseStudy22_files/figure-html/kable_formatting-2.png)<!-- -->
+<img src="CaseStudy22_files/figure-html/question5c_deep_analysis-1.png" style="display: block; margin: auto;" />
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
+**THE TOP 15 COUNTRIES WITH THE HIGHEST AIP MEAN ARE:**
+- Taiwan
+- Macao
+- Cyprus
+- Dominican Republic
+- Qatar
+- Panama
+- Puerto Rico
+- Iceland
+- Ecuador
+- Colombia
+- Sri Lanka
+- Turkey
+- Uruguay
+- Iran
+- Poland
 
-# Create a new data.frame with columns rearranged with the CLEAN data
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
+**THE COUNTRIES THAT ARE BOTH IN TOP 15 WITH THE HIGHEST DP MEAN AND AIP MEAN ARE:**
+ 
+ - Taiwan
+ - Macao
+ - Qatar
+ - Panama
+ - Puerto Rico
+ - Ecuador
+ - Colombia
+ - Sri Lanka
+ - Uruguay
+ 
+*Ecuador and Uruguay also have the same rank on both scales.*
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------** 
 
 ```r
-procrastinateClean <- select(procrastinate, RowID,
-                                            Age,
-                                            Gender,
-                                            Kids,
-                                            Education,
-                                            EducationAlt,
-                                            WrkStatus,
-                                            Income,
-                                            Occupation,
-                                            OccupatnAlt,
-                                            YearsInPos,
-                                            MnthsInPos,
-                                            CommSize,
-                                            Country,
-                                            MaritalStat,
-                                            Sons,
-                                            Daughters,
-                                            SelfProcrast,
-                                            OthrProcrast,
-                                            DPMean,
-                                            AIPMean,
-                                            GPMean,
-                                            SWLSMean,
-                                            DP1,
-                                            DP2,
-                                            DP3,
-                                            DP4,
-                                            DP5,
-                                            AIP1,
-                                            AIP2,
-                                            AIP3,
-                                            AIP4,
-                                            AIP5,
-                                            AIP6,
-                                            AIP7,
-                                            AIP8,
-                                            AIP9,
-                                            AIP10,
-                                            AIP11,
-                                            AIP12,
-                                            AIP13,
-                                            AIP14,
-                                            AIP15,
-                                            GP1,
-                                            GP2,
-                                            GP3,
-                                            GP4,
-                                            GP5,
-                                            GP6,
-                                            GP7,
-                                            GP8,
-                                            GP9,
-                                            GP10,
-                                            GP11,
-                                            GP12,
-                                            GP13,
-                                            GP14,
-                                            GP15,
-                                            GP16,
-                                            GP17,
-                                            GP18,
-                                            GP19,
-                                            GP20,
-                                            SWLS1,
-                                            SWLS2,
-                                            SWLS3,
-                                            SWLS4,
-                                            SWLS5)
+################# 5D ##################################
+# Create a data frame with age, income, and gender variables
+AgeIncomeGender <- sqldf("select Age, Income, Gender
+                          From HDIMerged
+                          Where Income <> 'NA'")
+
+# Regress Income on Age
+mylm <- lm(Income ~ Age, data=AgeIncomeGender)
+
+# Plot of Income vs Age
+  ggplot(AgeIncomeGender, aes(x=Age, y=Income, colour=Gender)) + 
+  geom_point() +
+  geom_line(colour="red",aes(y=fitted(mylm)))+
+  xlab("AGE") + 
+  ylab("INCOME") + 
+  ggtitle("AGE vs INCOME")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.title=element_text(size=15),
+  plot.title = element_text(size=25, hjust = 0.5, vjust = 1)) +
+  scale_fill_brewer(palette="Set1")
 ```
 
-## Write csv files for client
-
-
-```r
-# Write CSV in R
-# write.csv(procrastinateClean, file = "Test.csv")
-# write.csv(HDIMerged, file = "merged.csv", row.names=FALSE )
-```
-
+<img src="CaseStudy22_files/figure-html/Question5d_create_clean_dataframe-1.png" style="display: block; margin: auto;" />
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
 
 
 ```r
-# Extra code will clean out later before submission
-# Top15ProcrastinatorsAIP <- HDIMerged %>%
-#                             filter(Country!="*Missing*") %>%
-#                             select(Country, AIPMean, HDICategory) %>%
-#                             aggregate(AIPMean ~ Country, .,mean) %>%
-#                             arrange(desc(AIPMean)) %>%
-#                             slice(1:15)
-# 
-# # Round the aggregated mean to 2 decimal places
-# Top15ProcrastinatorsAIP$AIPMean <- round(Top15ProcrastinatorsAIP$AIPMean, digits=2)
-# 
-# 
-# Top15ProcrastinatorsByCoountry <- sqldf("select Country, 
-#                                          HDICategory, 
-#                                          round(avg(DPMean),2) as DPMean,
-#                                          round(avg(AIPMean),2) as AIPMean
-#                                          from HDIMerged
-#                                          Where Country<>'*Missing*'
-#                                          Group by Country, HDICategory
-#                                          Order by AIPMean desc") %>%
-#                                          slice(1:15)
-#   
+################# 5E ##################################
+# Create a data frame with age, income, and gender variables
+# Create a subset of data for comparing Life Satisfcation and HDI 
 
+swls_hdi <- subset(HDIMerged, select = c(SWLSMean, HDI, HDICategory)) %>%
+                  filter(HDI!="*Missing*") %>%
+                  arrange(desc(SWLSMean))
 
+# Transform to numeric values
+swls_hdi[, 1:2] <- sapply(swls_hdi[, 1:2], as.numeric)
 
-
-# display.brewer.all()
-# kable(Top15Procrastinators, "html") %>%
-# kable_styling("striped", full_width = F, position = "left" ) %>%
-# column_spec(2, background = "mistyrose") 
-# row_spec(3, bold = T, color = "white", background = "#D7261E")
-
-# # Using SQL
-# Top15ProcrastinatorsSQL <- sqldf("select Country, HDICategory, round(sum(DPMean)/count(DPMean),2) as DPMean
-#                                   from HDIMerged
-#                                   Where Country<>'*Missing*'
-#                                   Group by Country, HDI
-#                                   Order by DPMean desc") %>%
-#                                   slice(1:15)
-
-
-# Using the lm function run a simple linear regression
-#data.lm <- lm(Income ~ Age, data=HDIMerged)
-
-#Print the result set
-#data.lm
-
-#Print the summary for the result set
-#summary(data.lm)
-
-#95% Confidence Intervals
-#confint.lm(data.lm)
-
-# Scatter plot for data *******************************************
-# plot(x = HDIMerged$Age, 
-#      y = log(HDIMerged$Income),
-#      #xlim = c(3.25,10), 
-#      #ylim = c(.180,.525) ,
-#      xlab = "Age", 
-#      ylab = "Income", 
-#      main = "Age vs Income"
-#      )
-# 
 # # linear regression analysis
-# mylm <- lm(log(Income) ~ Age, data=HDIMerged)
-# 
-# abline (mylm, col = "red")
+mylm <- lm(SWLSMean ~ HDI, data=swls_hdi)
 
+# Plot a scatter plot for age and income without log transform
 # Add the regression line
-# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
-#   geom_point()+
-#   geom_smooth(method=lm)
-# # Remove the confidence interval
-# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
-#   geom_point()+
-#   geom_smooth(method=lm, se=FALSE)
-# # Loess method
-# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
-#   geom_point()+
-#   geom_smooth()
-# 
-# # Change the point colors and shapes
-# # Change the line type and color
-# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
-#   geom_point(shape=18, color="blue")+
-#   geom_smooth(method=lm, se=FALSE, linetype="dashed",
-#              color="darkred")
-# # Change the confidence interval fill color
-# ggplot(HDIMerged, aes(x=Age, y=Income)) + 
-#   geom_point(shape=18, color="blue")+
-#   geom_smooth(method=lm,  linetype="dashed",
-#              color="darkred", fill="blue")
-# kable(GenderFreq, "html") %>%
-# kable_styling(bootstrap_options = c("striped", "hover"))
-# 
-# kable(GenderFreq, "html") %>%
-# kable_styling(bootstrap_options = c("striped", "hover",
-# "condensed"))
-# 
-# kable(GenderFreq, "html") %>%
-# kable_styling(bootstrap_options = c("striped", "hover",
-# "condensed", "responsive"))
-# 
-# kable(GenderFreq, "html") %>%
-# kable_styling(bootstrap_options = "striped", full_width= F)
-
-# kable(GenderFreq, "html") %>%
-# kable_styling(bootstrap_options = "striped", full_width
-# = F, position = "left")
-
-# kable(GenderFreq, "html") %>%
-# kable_styling(bootstrap_options = "striped", full_width
-# = F, position = "float_left")
-
-# kable(WrkStatusFreq, format = "html") %>%
-# kable_styling("striped", full_width = F) %>%
-# row_spec(0, angle = 0)
+ggplot(swls_hdi, aes(x=HDI, y=SWLSMean)) +
+  geom_point(color="red")+
+  geom_smooth(method=lm, se=FALSE) +
+  xlab("HUMAN DEVELOPMENT INDEX(HDI)") + 
+  ylab("SWLS MEAN") + 
+  ggtitle("HDI vs SWLS MEAN")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.title=element_text(size=15),
+  plot.title = element_text(size=25, hjust = 0.5, vjust = 1)) +
+  scale_fill_brewer(palette="Set1")
 ```
 
+<img src="CaseStudy22_files/figure-html/Question5e_scatter_plot-1.png" style="display: block; margin: auto;" />
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+
+```r
+# Aggregate the average AIP Mean by country
+SWLSMeanByHDICategory <- select(HDIMerged, HDICategory, SWLSMean) %>%
+                         filter(HDICategory!="*Missing*") %>%
+                         aggregate(SWLSMean ~ HDICategory, .,mean)
+
+
+# Bar graph using GGPLOT HDICategory vs Life Satisfaction
+ggplot(SWLSMeanByHDICategory,aes(x=reorder(HDICategory,-SWLSMean),y=SWLSMean, fill=HDICategory))+
+  geom_bar(stat="identity", width=0.8, position = position_dodge(width=1))+
+  #coord_cartesian(xlim = c(0,16), ylim = c(3, 4.75))+
+  xlab("HDI CATEGORY") + 
+  ylab("SWLS MEAN") + 
+  ggtitle("HDI CATEGORY vs LIFE SATISFACTION")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size=15, angle = 0, hjust = 1, vjust = 0.5),
+        axis.title=element_text(size=15),
+  plot.title = element_text(size=25, hjust = 0.5, vjust = 1)) +
+  scale_fill_brewer(palette="Set1")
+```
+
+<img src="CaseStudy22_files/figure-html/Question5e_barchart-1.png" style="display: block; margin: auto;" />
+
+```r
+# Log transform income to see whether it changes the relationship, it does not
+# swls_hdi[, 2] <- log(swls_hdi[2],2)
+```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
 
 
 
 ```r
-#  dt <- mtcars[1:5, 1:6]
-#  kable(dt, "html")
-# 
-# dt %>%
-# kable("html") %>%
-# kable_styling()
-# 
-# kable(dt, "html") %>%
-# kable_styling(bootstrap_options = "striped", font_size =
-# 7)
-# 
-# text_tbl <- data.frame(
-# Items = c("Item 1", "Item 2", "Item 3"),
-# Features = c(
-# "Lorem ipsum dolor sit amet, consectetur adipiscing el
-# it. Proin vehicula tempor ex. Morbi malesuada sagittis tur
-# pis, at venenatis nisl luctus a. ",
-# "In eu urna at magna luctus rhoncus quis in nisl. Fusc
-# e in velit varius, posuere risus et, cursus augue. Duis el
-# eifend aliquam ante, a aliquet ex tincidunt in. ",
-# "Vivamus venenatis egestas eros ut tempus. Vivamus id
-# est nisi. Aliquam molestie erat et sollicitudin venenatis.
-# In ac lacus at velit scelerisque mattis. "
-# )
-# )
-# kable(text_tbl, "html") %>%
-# kable_styling(full_width = F) %>%
-# column_spec(1, bold = T, border_right = T) %>%
-# column_spec(2, width = "30em", background = "yellow")
-# 
-# 
-# 
-# 
-# 
-# 
-# mtcars[1:10, 1:2] %>%
-# mutate(
-# car = row.names(.),
-# # You don't need format = "html" if you have ever defined options(knitr.table.format)
-# 
-# mpg = cell_spec(mpg, "html", color = ifelse(mpg > 20,
-# "red", "blue")),
-# cyl = cell_spec(cyl, "html", color = "white", align =
-# "c", angle = 45,
-# background = factor(cyl, c(4, 6, 8),
-# c("#666666", "#999
-# 999", "#BBBBBB")))
-# ) %>%
-# select(car, mpg, cyl) %>%
-# kable("html", escape = F) %>%
-# kable_styling("striped", full_width = F)
-# 
-# 
-# 
-# iris[1:10, ] %>%
-# mutate_if(is.numeric, function(x) {
-# cell_spec(x, "html", bold = T, color = spec_color(x, end = 0.9),
-# font_size = spec_font_size(x))
-# }) %>%
-# mutate(Species = cell_spec(
-# Species, "html", color = "white", bold = T,
-# background = spec_color(1:10, end = 0.9, option = "A",
-# direction = -1)
-# )) %>%
-# kable("html", escape = F, align = "c") %>%
-# kable_styling("striped", full_width = F)
-# 
-# 
-# 
-# sometext <- strsplit(paste0(
-# "You can even try to make some crazy things like this paragraph. ",
-# "It may seem like a useless feature right now but it's so cool ",
-# "and nobody can resist. ;)"
-# ), " ")[[1]]
-# text_formatted <- paste(
-# text_spec(sometext, "html", color = spec_color(1:length(
-# sometext), end = 0.9),
-# font_size = spec_font_size(1:length(sometext),
-# begin = 5, end = 20)),
-# collapse = " ")
-# 
-# #To display the text, type `r text_formatted` outside of the chunk
-# 
-# popover_dt <- data.frame(
-# position = c("top", "bottom", "right", "left"),
-# stringsAsFactors = FALSE
-# )
-# popover_dt$`Hover over these items` <- cell_spec(
-# paste("Message on", popover_dt$position), # Cell texts
-# popover = spec_popover(
-# content = popover_dt$position,
-# title = NULL, # title will add a Title Panel on top
-# position = popover_dt$position
-# ))
-# kable(popover_dt, "html", escape = FALSE) %>%
-# kable_styling("striped", full_width = FALSE)
-# 
-# 
-# popover_dt <- data.frame(
-# position = c("top", "bottom", "right", "left"),
-# stringsAsFactors = FALSE
-# )
-# popover_dt$`Hover over these items` <- cell_spec(
-# paste("Message on", popover_dt$position), # Cell texts
-# popover = spec_popover(
-# content = popover_dt$position,
-# title = NULL, # title will add a Title Panel on top
-# position = popover_dt$position
-# ))
-# kable(popover_dt, "html", escape = FALSE) %>%
-# kable_styling("striped", full_width = FALSE)
-# 
-# kable(dt, "html") %>%
-# kable_styling("striped") %>%
-# add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2, "Group 3" = 2))
-# 
-# kable(dt, "html") %>%
-# kable_styling(c("striped", "bordered")) %>%
-# add_header_above(c(" ", "Group 1" = 2, "Group 2" = 2, "Group 3" = 2)) %>%
-# add_header_above(c(" ", "Group 4" = 4, "Group 5" = 2)) %>%
-# add_header_above(c(" ", "Group 6" = 6))
-# 
-# kable(cbind(mtcars, mtcars), "html") %>%
-# kable_styling() %>%
-# scroll_box(width = "900px", height = "600px")
+# Create a new data.frame with columns rearranged with the CLEAN data
+ProcrastinateClean <- select(HDIMerged, 
+                            Age,
+                            Gender,
+                            Kids,
+                            Education,
+                            EducationAlt,
+                            WrkStatus,
+                            Income,
+                            Occupation,
+                            OccupatnAlt,
+                            YearsInPos,
+                            MnthsInPos,
+                            CommSize,
+                            Country,
+                            MaritalStat,
+                            Sons,
+                            Daughters,
+                            SelfProcrast,
+                            OthrProcrast,
+                            HDICategory,
+                            DPMean,
+                            AIPMean,
+                            GPMean,
+                            SWLSMean,
+                            DP1,
+                            DP2,
+                            DP3,
+                            DP4,
+                            DP5,
+                            AIP1,
+                            AIP2,
+                            AIP3,
+                            AIP4,
+                            AIP5,
+                            AIP6,
+                            AIP7,
+                            AIP8,
+                            AIP9,
+                            AIP10,
+                            AIP11,
+                            AIP12,
+                            AIP13,
+                            AIP14,
+                            AIP15,
+                            GP1,
+                            GP2,
+                            GP3,
+                            GP4,
+                            GP5,
+                            GP6,
+                            GP7,
+                            GP8,
+                            GP9,
+                            GP10,
+                            GP11,
+                            GP12,
+                            GP13,
+                            GP14,
+                            GP15,
+                            GP16,
+                            GP17,
+                            GP18,
+                            GP19,
+                            GP20,
+                            SWLS1,
+                            SWLS2,
+                            SWLS3,
+                            SWLS4,
+                            SWLS5)
 ```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
+CLIENT DATA FILES ARE IN THE "DATA" FOLDER IN THE REPOSITORY
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+```r
+# Write csv files to present to client
+
+# write.csv(ProcrastinateClean, file = "ProcrastinationCLEAN.csv", row.names=FALSE )
+# write.csv(procrastinate_raw,  file = "ProcrastinationRAW.csv"  , row.names=FALSE )
+# write.csv(HDIMerged, file = "HDI_Merged_Data.csv", row.names=FALSE )
+# write.csv(HDI_raw,   file = "HDI_Data.csv", row.names=FALSE )
+```
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
+
+## SUMMARY
+
+This study focuses on the procrastination behaviors of a wide spectrum of regions and demographic behavior. As the United States is the leading polled country, it can be inferred (assumption we are making assuming that we actually conducted the survey on behalf of the client) that this is a representative view of the US procrastination behavior. 
+
+Some descriptive statistics of the particiapnts give us a better understanding of the polled demographics: ~57% are female and the remaining 43% are male, mean age is ~37 and the mean income is $58,916. Of all the countries surveyed, Taiwan had the highest GP Mean score and AIP mean score, and Brunei had the highest DP mean score. 
+
+Top 15 country rankings by AIP mean score and DP mean score can be found in the main analysis. The survey gave us a deep insight into global procrastination behaviors but it was interesting to assess whether broader factors, such as HDI, contribute to these behaviors. After scraping wikipedia and associating HDI scores and categories to country origin of surveyed participants we were able to analyze futher. Our finding is that HDI and socio-economic attributes are a driving factor of procrastination behavior.
+
+THANK YOU FOR THIS OPPORTUNITY TO ANALYZE YOUR DATA AND PRESENT OUR FINDINGS.
+
+CONTACT INFORMATION:
+**GLOBAL CONSULTANCY, INC.**
+
+RUHAAB MARKAS
+rmarkas@mail.smu.edu
+Tel: 1 (789)647 4563
+
+KEVIN MENDONSA
+kmendonsa@mail.smu.edu
+Tel: 1(714)945 5874
+
+**---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 
