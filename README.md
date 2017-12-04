@@ -103,7 +103,7 @@ File is labeled Procastination.csv and can be found in the Data repo.
 - Computed column: SWLSMean - mean of the SWLS survey variable
 
 
-- There were several survey questionnaire types that are not defined in the data set: DP, AIP, GP, and SWLS. We will explain the concepts of these questions so that it may be properly interpreted. 
+- There were several survey questionnaire types that are not defined in the data set: DP, AIP, GP, and SWLS. We will explain the concepts of these questions so that it may be properly interpreted. The exact questions can be found within the Procrastination.csv file or the data dictionary that is published in the "data" repo.
 
 #### GP:General Procrastination Scale
 
@@ -148,3 +148,8 @@ The variables are described below:
 - HDI2016_15: Human Development Index (HDI) score for the calendar year '15-'16
 
 - HDIChngYoY: Meaure (%) as to the change in HDI over the last year
+
+#### Summary
+
+This study focuses on the procrastination behaviors of a wide spectrum of regions and demographic behavior. As the United States is the leading polled country, it can be inferred (assumption we are making pretending that we actually conducted the survey on behalf of the client) that this is a representative view of the US procrastination behavior. Some descriptive statistics of the particiapnts give us a better understanding of the polled demographics: ~57% are female and the remaining 43% are male, mean age is ~37 and the mean income is $58,916. Of all the countries surveyed, Taiwan had the highest GP and AIP mean, and Brunei had the highest DP mean. Top 15 country rankings by AIP and DP can be found in the main analysis. HDI and socio-economic attributes are definitely a driving factor of procastination behavior. 
+
