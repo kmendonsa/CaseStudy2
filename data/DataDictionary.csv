@@ -1,0 +1,65 @@
+OriginalFieldName,NewVariable,LabelLength,DataType,MissingValues
+Country of residence,Country,,character,236
+Age,Age,,numeric,71
+Gender,Gender,6,character,70
+Kids,Kids,4,character,4
+Edu,Education,9,character,78
+Derived Field,EducationAlt,12,character,78
+Work Status,WrkStatus,9,character,113
+Annual Income,Income,6,numeric,548
+Derived Field,IncomeCurr,10,character,548
+Current Occupation,Occupation,10,character,2651
+Derived Field,OccupatinAlt,12,character,2651
+How long have you held this position?: Years,YearsInPos,10,numeric,104
+How long have you held this position?: Months,MnthsInPos,10,numeric,6
+Community size,CommSize,8,character,213
+Marital Status,MaritalStat,11,character,161
+Number of sons,Sons,4,numeric,4
+Number of daughters,Daughters,9,numeric,4
+(DP 1) I waste a lot of time on trivial matters before getting to the final decisions,DP1,3,numeric,0
+(DP 2) Even after I make a decision I delay acting upon it,DP2,3,numeric,0
+(DP 3) I don’t make decisions unless I really have to,DP3,3,numeric,0
+(DP 4) I delay making decisions until it’s too late,DP4,3,numeric,0
+(DP 5) I put off making decisions until it’s too late,DP5,3,numeric,0
+(AIP 1) I pay my bills on time,AIP1,4,numeric,0
+(AIP 2)I am prompt and on time for most appointments.,AIP2,4,numeric,0
+"(AIP 3)I lay out my clothes the night before I have an important appointment, so I won’t be late",AIP3,4,numeric,0
+(AIP 4) I find myself running later than I would like to be,AIP4,4,numeric,0
+(AIP 5) I don’t get things done on time,AIP5,4,numeric,0
+"(AIP 6) If someone were teaching a course on how to get things done on time, I would attend",AIP6,4,numeric,0
+(AIP 7) My friends and family think I wait until the last minute.,AIP7,4,numeric,0
+(AIP 8) I get important things done with time to spare,AIP8,4,numeric,0
+(AIP 9) I am not very good at meeting deadlines,AIP9,4,numeric,0
+(AIP 10) I find myself running out of time.,AIP10,5,numeric,0
+(AIP 11) I schedule doctor’s appointments when I am supposed to without delay,AIP11,5,numeric,0
+(AIP 12) I am more punctual than most people I know,AIP12,5,numeric,0
+"(AIP 13) I do routine maintenance (e.g., changing the car oil) on things I own as often as I should",AIP13,5,numeric,0
+(AIP 14)When I have to be somewhere at a certain time my friends expect me to run a bit late,AIP14,5,numeric,0
+(AIP 15)Putting things off till the last minute has cost me money in the past,AIP15,5,numeric,0
+(GP 1)I often find myself performing tasks that I had intended to do days before,GP1,3,numeric,0
+"(GP2) I often miss concerts, sporting events, or the like because I don’t get around to buying tickets on time",GP2,3,numeric,0
+"(GP 3) When planning a party, I make the necessary arrangements well in advance",GP3,3,numeric,0
+"(GP 4) When it is time to get up in the morning, I most often get right out of bed",GP4,3,numeric,0
+(GP 5) A letter may sit for days after I write it before mailing it possible,GP5,3,numeric,0
+(GP 6) I generally return phone calls promptly,GP6,3,numeric,0
+"(GP 7) Even jobs that require little else except sitting down and doing them, I find that they seldom get done for days",GP7,3,numeric,0
+(GP 8) I usually make decisions as soon as possible,GP8,3,numeric,0
+(GP 9) I generally delay before starting on work I have to do,GP9,3,numeric,0
+"(GP 10) When traveling, I usually have to rush in preparing to arrive at the airport or station at the appropriate time",GP10,4,numeric,0
+"(GP 11) When preparing to go out, I am seldom caught having to do something at the last minute",GP11,4,numeric,0
+"(GP 12) In preparation for some deadlines, I often waste time by doing other things",GP12,4,numeric,0
+"(GP 13) If a bill for a small amount comes, I pay it right away",GP13,4,numeric,0
+(GP 14) I usually return a “RSVP” request very shortly after receiving it,GP14,4,numeric,0
+(GP 15) I often have a task finished sooner than necessary,GP15,4,numeric,0
+(GP 16) I always seem to end up shopping for birthday gifts at the last minute,GP16,4,numeric,0
+(GP 17) I usually buy even an essential item at the last minute,GP17,4,numeric,0
+(GP 18) I usually accomplish all the things I plan to do in a day,GP18,4,numeric,0
+(GP 19) I am continually saying “I’ll do it tomorrow”,GP19,4,numeric,0
+(GP 20) I usually take care of all the tasks I have to do before I settle down and relax for the evening,GP20,4,numeric,0
+(SWLS 1) In most ways my life is close to my ideal,SWLS1,5,numeric,0
+(SWLS 2)The conditions of my life are excellent,SWLS2,5,numeric,0
+(SWLS 3) I am satisfied with my life.,SWLS3,5,numeric,0
+(SWLS 4) So far I have gotten the important things I want in life,SWLS4,5,numeric,0
+"(SWLS 5) If I could live my life over, I would change almost nothing",SWLS5,5,numeric,0
+Do you consider yourself a procrastinator?,SelfProcrast,12,character,8
+Do others consider you a procrastinator?,OthrProcrast,12,character,33
