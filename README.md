@@ -43,7 +43,7 @@ File is labeled Procastination.csv and can be found in the Data repo.
 - A file named DataDictionary.csv is provided in the Data folder that provides an in-depth data dictionary of the fields, original names, new names, label length etc.
 - A file named CleanData.csv of the "CLEANSED" data is also added to this folder for delivery to the client.
 
-####An explanation of each variables is provided below:
+#### An explanation of each variables is provided below:
 
 - Age: The participant’s age in years. Participants 18 years of age and under and 80 years of age and above have been exlcuded from the analysis and study of the data.
 
