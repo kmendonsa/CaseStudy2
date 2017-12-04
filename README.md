@@ -1,4 +1,4 @@
-# CaseStudy2
+# CODEBOOK
 
 # Introduction to the basis of the data and its analysis
 
