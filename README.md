@@ -25,9 +25,9 @@ Data - This repo contains all the data related to the project. This data will be
 - HDI_Data.csv: File containing the HDI category and HDI score per country
 - HDI_Merged_Data.csv: File containing sampled procrastination and HDI data
 - OccupationsMapping.CSV: Naming convention transformation of all the occupation types 
+- ProcrastinationCLEAN.csv: Using the transformed variables names 
+- ProcrastinationRAW.csv:  Does not use the transformed variable names 
 - WebScrape.CSV: HDI data scraped from Wikipedia 
-
-Other - This repo contains working files of the entire project. Individual sections of the Case Study can be found here. 
 
 Paper - The objectives of the case study are stored in this repo. 
 
