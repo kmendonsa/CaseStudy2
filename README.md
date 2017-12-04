@@ -7,11 +7,11 @@ This analysis takes a closer look into the behaviors of procrastination globally
 
 #### Decisional Procrastination Scale (Mann, 1982)
 
-#### Adult Inventory of Procrastination (McCown & Johnson, 1989): 
+#### Adult Inventory of Procrastination (McCown & Johnson, 1989)
 
-#### General Procrastination scale (Lay, 1986): 
+#### General Procrastination scale (Lay, 1986)
 
-#### Satisfaction with Life Scale (Diener et al., 1985): 
+#### Satisfaction with Life Scale (Diener et al., 1985)
 
 # Repo Organization 
 
