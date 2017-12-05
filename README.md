@@ -27,6 +27,8 @@ Data - This repo contains all the data related to the project. This data will be
 - **OccupationsMapping.csv**: Naming convention transformation of all the occupation types 
 - **ProcrastinationCLEAN.csv**: Using the transformed variables names 
 - **ProcrastinationRAW.csv**:  Does not use the transformed variable names 
+- **Top15CountriesAIP_HDI.csv**: Top 15 countries - AIP mean and HDI scores
+- **Top15CountriesDP_HDI.csv**:  Top 15 countries - DP mean and HDI scores 
 
 Paper - The objectives of the case study are stored in this repo. 
 
