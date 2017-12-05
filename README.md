@@ -75,37 +75,37 @@ File is labeled Procastination.csv and can be found in the Data repo.
 
     + While considerable more work could be done to further standardize and normalize the data, it may be conducted should deeper analysis be required.
 
-- How long have you held this position?: Years: Number of years in this job.
+- **How long have you held this position?**: Years: Number of years in this job.
 
-- How long have you held this position?: Months: Number of months in this job.
+- **How long have you held this position?**: Months: Number of months in this job.
 
-- Community: Size of community
+- **Community**: Size of community
 
-- Country of Residence: The country where the person holds citizenship.  There were missing values in this field.
+- **Country of Residence**: The country where the person holds citizenship.  There were missing values in this field.
 
-- Marital Status: Single, Married, Divorced, Separated, etc.
+- **Marital Status**: Single, Married, Divorced, Separated, etc.
 
-- Number of Sons/Number of daughters: integer number of children. In this field we have explicitly converted the number 2 to "Female" and the number 1 to "Male" as it appears those are the true values that should have been present.
+- **Number of Sons/Number of daughters**: integer number of children. In this field we have explicitly converted the number 2 to "Female" and the number 1 to "Male" as it appears those are the true values that should have been present.
 
-- All variables starting with DP – the Decisional Procrastination Scale (Mann, 1982)
+- **All variables starting with DP** – the Decisional Procrastination Scale (Mann, 1982)
 
-- All variables starting with AIP – Adult Inventory of Procrastination (McCown & Johnson, 1989)
+- **All variables starting with AIP** – Adult Inventory of Procrastination (McCown & Johnson, 1989)
 
-- All variables starting with GP – the General Procrastination scale (Lay, 1986)
+- **All variables starting with GP** – the General Procrastination scale (Lay, 1986)
 
-- All variables starting with SWLS – the Satisfaction with Life Scale (Diener et al., 1985)
+- **All variables starting with SWLS** – the Satisfaction with Life Scale (Diener et al., 1985)
 
-- Do you consider yourself a procrastinator?: a binary response
+- **Do you consider yourself a procrastinator?**: a binary response
 
-- Do others consider you a procrastinator?: a binary response
+- **Do others consider you a procrastinator?**: a binary response
 
-- Computed column: DPMean - mean of the DP survey variable
+- **Computed column: DPMean** - mean of the DP survey variable
 
-- Computed column: AIPMean - mean of the AIP survey variable
+- **Computed column: AIPMean** - mean of the AIP survey variable
 
-- Computed column: GPMean - mean of the GP survey variable
+- **Computed column: GPMean** - mean of the GP survey variable
 
-- Computed column: SWLSMean - mean of the SWLS survey variable
+- **Computed column: SWLSMean** - mean of the SWLS survey variable
 
 
 - There were several survey questionnaire types that are not defined in the data set: DP, AIP, GP, and SWLS. We will explain the concepts of these questions so that it may be properly interpreted. The exact questions can be found within the Procrastination.csv file or the data dictionary that is published in the "data" repo.
