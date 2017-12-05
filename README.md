@@ -136,7 +136,7 @@ SWLS is typically a concise 5-item insturment used to underantd and measure glob
 
 Source: <https://internal.psychology.illinois.edu/~ediener/SWLS.html>
 
-#### WebScrape.CSV
+#### HDI_SCRAPED.CSV
 
 This data was scraped from Wikipedia and contains Human Development Attibutes for 189 countries. 
 <https://en.wikipedia.org/wiki/List_of_countries_by_Human_Development_Index>
