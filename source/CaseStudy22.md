@@ -1496,6 +1496,12 @@ Top15ProcrastinatorsDP <- merge(DPMeanByCountry, HDICategoryByCountry, by = "Cou
                             arrange(desc(DPMean)) %>%
                             slice(1:15)
 
+# Top 15 nations with their HDI scores for DP
+Top15DPWithHDI <- merge(Top15ProcrastinatorsDP, HDI_raw, by = "Country", all.x = TRUE) %>%
+                        select(Country, DPMean, HDI) %>%
+                            arrange(desc(DPMean)) %>%
+                            slice(1:15)
+
 # Round the aggregated mean to 2 decimal places
 Top15ProcrastinatorsDP$DPMean <- round(Top15ProcrastinatorsDP$DPMean, digits=2)
 
@@ -1549,6 +1555,12 @@ HDICategoryByCountry <- distinct(select(HDIMerged, Country, HDICategory))
 
 # Merge the aggregate of DPMean and the distinct country and HDI category
 Top15ProcrastinatorsAIP <- merge(AIPMeanByCountry, HDICategoryByCountry, by = "Country", all.x = TRUE) %>%
+                            arrange(desc(AIPMean)) %>%
+                            slice(1:15)
+
+# Top 15 nations with their HDI scores for AIP
+Top15AIPWithHDI <- merge(Top15ProcrastinatorsAIP, HDI_raw, by = "Country", all.x = TRUE) %>%
+                        select(Country, AIPMean, HDI) %>%
                             arrange(desc(AIPMean)) %>%
                             slice(1:15)
 
@@ -1792,6 +1804,8 @@ CLIENT DATA FILES ARE IN THE "DATA" FOLDER IN THE REPOSITORY
 # write.csv(procrastinate_raw,  file = "ProcrastinationRAW.csv"  , row.names=FALSE )
 # write.csv(HDIMerged, file = "HDI_Merged_Data.csv", row.names=FALSE )
 # write.csv(HDI_raw,   file = "HDI_Data.csv", row.names=FALSE )
+# write.csv(Top15AIPWithHDI,   file = "Top15CoountriesAIP_HDI.csv", row.names=FALSE )
+# write.csv(Top15DPWithHDI,   file = "Top15CoountriesDP_HDI.csv", row.names=FALSE )
 ```
 **---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------**
 

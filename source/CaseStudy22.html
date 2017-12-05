@@ -1889,6 +1889,12 @@ Top15ProcrastinatorsDP &lt;- merge(DPMeanByCountry, HDICategoryByCountry, by = &
                             arrange(desc(DPMean)) %&gt;%
                             slice(1:15)
 
+# Top 15 nations with their HDI scores for DP
+Top15DPWithHDI &lt;- merge(Top15ProcrastinatorsDP, HDI_raw, by = &quot;Country&quot;, all.x = TRUE) %&gt;%
+                        select(Country, DPMean, HDI) %&gt;%
+                            arrange(desc(DPMean)) %&gt;%
+                            slice(1:15)
+
 # Round the aggregated mean to 2 decimal places
 Top15ProcrastinatorsDP$DPMean &lt;- round(Top15ProcrastinatorsDP$DPMean, digits=2)
 
@@ -1920,6 +1926,12 @@ HDICategoryByCountry &lt;- distinct(select(HDIMerged, Country, HDICategory))
 
 # Merge the aggregate of DPMean and the distinct country and HDI category
 Top15ProcrastinatorsAIP &lt;- merge(AIPMeanByCountry, HDICategoryByCountry, by = &quot;Country&quot;, all.x = TRUE) %&gt;%
+                            arrange(desc(AIPMean)) %&gt;%
+                            slice(1:15)
+
+# Top 15 nations with their HDI scores for AIP
+Top15AIPWithHDI &lt;- merge(Top15ProcrastinatorsAIP, HDI_raw, by = &quot;Country&quot;, all.x = TRUE) %&gt;%
+                        select(Country, AIPMean, HDI) %&gt;%
                             arrange(desc(AIPMean)) %&gt;%
                             slice(1:15)
 
@@ -2110,7 +2122,9 @@ ProcrastinateClean &lt;- select(HDIMerged,
 # write.csv(ProcrastinateClean, file = &quot;ProcrastinationCLEAN.csv&quot;, row.names=FALSE )
 # write.csv(procrastinate_raw,  file = &quot;ProcrastinationRAW.csv&quot;  , row.names=FALSE )
 # write.csv(HDIMerged, file = &quot;HDI_Merged_Data.csv&quot;, row.names=FALSE )
-# write.csv(HDI_raw,   file = &quot;HDI_Data.csv&quot;, row.names=FALSE )</code></pre>
+# write.csv(HDI_raw,   file = &quot;HDI_Data.csv&quot;, row.names=FALSE )
+# write.csv(Top15AIPWithHDI,   file = &quot;Top15CoountriesAIP_HDI.csv&quot;, row.names=FALSE )
+# write.csv(Top15DPWithHDI,   file = &quot;Top15CoountriesDP_HDI.csv&quot;, row.names=FALSE )</code></pre>
 <p><strong>—————————————————————————————————————————————————————————————————</strong></p>
 </div>
 </div>
