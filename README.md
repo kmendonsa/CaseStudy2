@@ -45,24 +45,24 @@ File is labeled Procastination.csv and can be found in the Data repo.
 - Some fields were "trimmed" of leading and trailing "whitespace" to enable matches and joins to other fields or data sets.
 - Where appropriate, invalid values in fields were considered as '*Missing*' i.e. 999,0 in character fields.
 - "NA" is also considered as  *Missing* value and in character fields have been explicitly changed.
-- A file named DataDictionary.csv is provided in the Data folder that provides an in-depth data dictionary of the fields, original names, new names, label length etc.
-- A file named CleanData.csv of the "CLEANSED" data is also added to this folder for delivery to the client.
+- A file named **DataDictionary.csv** is provided in the Data folder that provides an in-depth data dictionary of the fields, original names, new names, label length etc.
+- A file named **ProcrastinationCLEAN.csv** of the "CLEANSED" procrastination data is also added to this folder for delivery to the client.
 
-#### An explanation of each variables is provided below:
+#### An explanation of each variable is provided below:
 
-- Age: The participant’s age in years. Participants 18 years of age and under and 80 years of age and above have been exlcuded from the analysis and study of the data.
+- **Age**: The participant’s age in years. Participants 18 years of age and under and 80 years of age and above have been exlcuded from the analysis and study of the data.
 
-- Gender: The gender the participant identifies as (Male or Female).  There are some missing values in this field.
+- **Gender**: The gender the participant identifies as (Male or Female).  There are some missing values in this field.
 
-- Kids: Binary, whether they the respondent/participant has kids or not. The field was cleand to remove the word "kids" and retain a simple Yes/No to improve readability and enable better analysis.
+- **Kids**: Binary, whether they the respondent/participant has kids or not. The field was cleand to remove the word "kids" and retain a simple Yes/No to improve readability and enable better analysis.
 
-- Edu: Education levels are Phd, Masters, Degree, Diploma,Left University, High School, Left High School, Elementary school.  There are missing values in this field that have been converted to an explicit *Missing*.  The original values are retained and a new field called EducationAlt (alternate) is crested so the original field can be used for reference ir required for clarification.
+- **Edu**: Education levels are Phd, Masters, Degree, Diploma,Left University, High School, Left High School, Elementary school.  There are missing values in this field that have been converted to an explicit *Missing*.  The original values are retained and a new field called EducationAlt (alternate) is crested so the original field can be used for reference ir required for clarification.
 
-- Work Status: The current work status of the participant and work type.  This is either Full-time, Part-time, student, Retired, Unemployed.  There are missing values in this field that have been converted to an explicit *Missing*
+- **Work Status**: The current work status of the participant and work type.  This is either Full-time, Part-time, student, Retired, Unemployed.  There are missing values in this field that have been converted to an explicit *Missing*
 
-- Annual Income: This has been converted to dollars in the field IncomeCurr.  The regular field was retained as Income to conduct further analysis as a numeric field.
+- **Annual Income**: This has been converted to dollars in the field IncomeCurr.  The regular field was retained as Income to conduct further analysis as a numeric field.
 
-- Current Occupation:What kind of job are they working? The data in this field required considerable "scrubbing" as many respondents appear to have free-typed in their occupations making it quite difficult to do deeper analysis without further cleansing and categorizing the data.
+- **Current Occupation**:What kind of job are they working? The data in this field required considerable "scrubbing" as many respondents appear to have free-typed in their occupations making it quite difficult to do deeper analysis without further cleansing and categorizing the data.
 
     + The approach that was adopted was to try and "Normalize" and "Standardize" the occupations into meaningful commonly known professions so that they could be grouped/arranged as necessary to provide better insight. 
     + Unique professions were left untouched but similar occupations were standardized i.e. technology roles converted to IT so in a datasort they would be grouped together.
